@@ -205,6 +205,15 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
 #tip{position:fixed;pointer-events:none;z-index:20;background:#2A2623;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;max-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:none;color:var(--text)}
 #tip .m{color:var(--muted)}
 
+/* Embedded (e.g. a Notion /embed block, which has a fixed height): compact header, tabs pinned while you scroll */
+html.embed .wrap{padding:14px 20px 40px}
+html.embed .eyebrow,html.embed #rosternote{display:none}
+html.embed h1{font-size:20px;margin:0 0 2px}
+html.embed header{align-items:center}
+html.embed .tabbar{position:sticky;top:0;z-index:15;background:var(--bg);margin-top:10px}
+html.embed .panel{gap:32px;margin-top:22px}
+.fullpage{display:none;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+html.embed .fullpage{display:inline-flex}
 @media (max-width:1100px){
   .wrap{padding:32px 32px 64px}
   .cols,.grid4,.steps4,.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -233,7 +242,10 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
       <p class="sub" id="updated">Loading live data from Notion…</p>
       <p class="note" id="rosternote" hidden></p>
     </div>
-    <button type="button" class="btn" id="refresh" aria-label="Refresh data from Notion">↻ Refresh</button>
+    <div style="display:flex;align-items:center;gap:14px">
+      <a class="fullpage" id="fullpage" href="./" target="_blank" rel="noopener">Open full page ↗</a>
+      <button type="button" class="btn" id="refresh" aria-label="Refresh data from Notion">↻ Refresh</button>
+    </div>
   </header>
 
   <div class="tabbar">
@@ -1100,6 +1112,13 @@ function fillSelect(sel, values) {
 
 var CACHE_KEY = 'partner-lead-times:v1';
 
+// Inside an iframe (Notion embed) use the compact layout. ?embed=0 turns it off, ?embed=1 forces it.
+(function () {
+  var q = new URLSearchParams(location.search).get('embed'), framed = false;
+  try { framed = window.self !== window.top; } catch (e) { framed = true; }
+  if (q === '1' || (framed && q !== '0')) document.documentElement.classList.add('embed');
+})();
+
 // ============================================================================
 // Presentation. Everything below reads ALL (roster applied) or BASE and never changes data.
 // ============================================================================
@@ -1147,6 +1166,7 @@ function setTab(t, push) {
   $('windowctl').hidden = !(t === 'trends' || t === 'partners');
   $('weekctl').hidden = t !== 'report';
   if (push) { try { history.replaceState(null, '', '#' + t); } catch (e) {} }
+  var fp = $('fullpage'); if (fp) fp.href = location.pathname + '#' + t;
   tip.style.display = 'none';
   renderTab(t);
 }
