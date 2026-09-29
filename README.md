@@ -24,15 +24,37 @@ The page has five tabs (the URL remembers the last one, e.g. `…/#trends`):
   Months with fewer than 5 launches (3 for a stage tile) are faded and aren't used for comparisons.
 - **Deadlines & capacity**: on-time rate by brief month (briefs with no ⚑), footage days late vs Footage Due
   Date by partner, open sprints per person against a WIP limit (CS from the `CS` people fields, editors from
-  the MCT `Designer` field), assets launched per month (`Total Assets`), and lead time per asset.
+  the MCT `Designer` field), and assets launched per month (`Total Assets`).
 - **Weekly report**: see below.
 - **Spend check**: see below.
 
-Settings at the top of the script in `index.html`: `TARGET_LEAD_DAYS` (28), `WIP_LIMIT` (5), `STALLED_DAYS`
+All settings are in the Settings block at the top of the script in `index.html`, including `LEAD_TIME_METRIC`, `LEAD_TIME_TODAY_DAYS`, `ROSTER_ONLY_DEFAULT`, `PARTNER_ALIASES`, `EXCLUDED_PARTNERS`, `FOOTAGE_REVIEW_BUSINESS_DAYS` (true: the 2-day footage-review limit counts business days), `TARGET_LEAD_DAYS` (28), `WIP_LIMIT` (5), `STALLED_DAYS`
 (60: open briefs stuck this long in one stage are left out of workload and partner lateness),
 `MIN_MONTH_SAMPLE`, `MIN_TILE_SAMPLE`, plus the flag limits.
 
 The charts use Chart.js from cdnjs; everything else is plain HTML.
+
+## Lead time (one definition everywhere)
+
+**Lead time** = counted stage days from Briefing Start to Launch, with time on hold excluded, for briefs that
+have launched. It's exactly what a brief's bar adds up to. Waits that are deliberately not counted (a ready
+brief waiting for the 1st, Content Approved → MCT handoff) aren't included. Every tab shows the same number,
+labelled "Lead time (median, briefing → launch)". Set `LEAD_TIME_METRIC` to `'average'` to switch.
+
+- Timeline/Briefs: briefs launched in the chosen start-date period (last 90 days by default).
+- Today: briefs launched in the last `LEAD_TIME_TODAY_DAYS` (30).
+- Trends: per launch month. Weekly report: launches in the report week.
+
+## Who is included
+
+- **Current roster only** (header toggle, on by default, remembered per browser): only briefs whose partner
+  is Active in the Partners Database. A line under the header says how many briefs are hidden. With it off,
+  those briefs show a "Not on roster" tag. If the Partners Database can't be read, everyone is shown.
+- Partners are matched by the brief's Portal Partner link, then Sent To, then the name in the brief title.
+  Dots, commas and case are ignored, and `PARTNER_ALIASES` maps other spellings to one name.
+- Left out everywhere: `EXCLUDED_TIERS` (Commander Crew), `EXCLUDED_PARTNERS`, statuses Archive and Test
+  Status, template or test names (`XXX`, `Partner Name`, `Week#`, `Week1`, `TEST`), and briefs with no
+  milestone dates at all.
 
 ## How stage days are calculated
 
@@ -97,7 +119,7 @@ edits anything.
   limit. The Partners Database has multiple data sources, so this call uses Notion API version 2025-09-03.
   The integration must be connected to the Partners Database too.
 
-## Status overview (top of the Timeline tab)
+## Status overview (Weekly report tab)
 
 A written overview of everything in progress, rebuilt every Wednesday from the same snapshot as the weekly
 report: where things stand (and who the work is waiting on), the slowest bottlenecks, the biggest problems

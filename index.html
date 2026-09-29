@@ -48,6 +48,9 @@ a{color:var(--accent)}
 h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
 .sub{margin:4px 0 0;font-size:12px;color:var(--text-muted)}
 .hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.roster{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer}
+.roster input{accent-color:var(--accent);width:14px;height:14px;padding:0}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;padding:1px 6px;border-radius:999px;border:1px solid var(--border);color:var(--text-muted);margin-left:6px;vertical-align:1px;white-space:nowrap}
 .btn-accent{border-radius:999px;border:1px solid rgba(255,86,0,.4);background:rgba(255,86,0,.10);color:var(--accent);font-size:12px;font-weight:600;padding:6px 16px}
 .btn-accent:hover{background:rgba(255,86,0,.2)}
 .tabs,.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--border);border-radius:999px;background:var(--card-2)}
@@ -186,9 +189,11 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
       <p class="eyebrow">Mars Men · Partnerships</p>
       <h1>Partner Lead Times</h1>
       <p class="sub" id="updated">Loading live data from Notion…</p>
+      <p class="sub" id="rosternote" hidden></p>
       <p class="sub">Source: Partner Brief Library → Master Creative Tracker · calendar days between milestone dates</p>
     </div>
     <div class="hero-actions">
+      <label class="roster"><input type="checkbox" id="rosteronly"> Current roster only</label>
       <button id="refresh" class="btn-accent" type="button">Refresh</button>
       <nav class="tabs" id="tabs" role="tablist">
         <button type="button" role="tab" data-tab="timeline">Timeline</button>
@@ -244,17 +249,6 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
       </div>
     </div>
 
-    <div class="card" id="overview-card">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Status overview</div>
-          <div class="pnote" id="ovsub"></div>
-        </div>
-        <button id="copyov" class="btn-accent" type="button">Copy overview</button>
-      </div>
-      <div class="ovgrid" id="overview"></div>
-    </div>
-
     <div class="card">
       <div class="ctitle">Average days per phase</div>
 <p class="why"><b>What it shows:</b> the typical number of days each stage takes, across the briefs shown above (finished stages only). <b>How to read it:</b> the stacked bar at the top adds the stage averages together into one typical brief, from Briefing Start to launch, for the period chosen in the start-date filter (last 90 days by default). Below it, each stage on its own: longer bar = slower stage. Colours match the teams in the timeline. Late send to partner is the days Partnerships sent after the 1st of the brief month, counting on-time sends as 0. <b>Use it to:</b> see where the process loses the most time on average.</p>
@@ -274,9 +268,9 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
     <div class="windowbar"><span class="lbl">Window</span><div class="seg" data-window></div><span class="pnote">grouped by launch month · all partner briefs</span></div>
     <div class="kpis kpis-3" id="tkpis"></div>
     <div class="card">
-      <div class="chead"><div class="ctitle">Average lead time by launch month</div>
+      <div class="chead"><div class="ctitle">Lead time by launch month</div>
         <div class="legend-inline"><span><i style="background:var(--series-pbl)"></i>Partner Brief Library days</span><span><i style="background:var(--series-mct)"></i>Master Creative Tracker days</span><span><i class="dash"></i><span id="targetlbl">Target</span></span></div></div>
-<p class="why"><b>What it shows:</b> how long a brief took from Briefing Start to launch, averaged over everything that launched each month. <b>How to read it:</b> orange is time in the Brief Library, cream is time in the MCT, and the dashed line is the <span class="tgt">28-day</span> target. Faded bars had fewer than 5 launches, so treat them with caution. <b>Use it to:</b> tell whether we're getting faster or slower overall, and which half of the process is driving it.</p>
+<p class="why"><b>What it shows:</b> the official lead time (counted days from Briefing Start to launch, holds excluded) for the briefs that launched each month. <b>How to read it:</b> the bar's height is the lead time; orange and cream split it between the Brief Library and the MCT in proportion to the time spent in each, and the dashed line is the <span class="tgt">28-day</span> target. Faded bars had fewer than 5 launches, so treat them with caution. <b>Use it to:</b> tell whether we're getting faster or slower overall, and which half of the process is driving it.</p>
       <div class="chartbox" style="height:280px"><canvas id="c-lead" role="img" aria-label="Average lead time by launch month"></canvas></div>
     </div>
     <div class="card">
@@ -311,11 +305,6 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
         <div class="ctitle">Assets launched per month</div>
 <p class="why"><b>What it shows:</b> how many finished assets we shipped each month (Total Assets on launched MCT items). <b>How to read it:</b> taller bars = more output. Hover for the number of MCT items behind it. <b>Use it to:</b> check that output keeps up as the partner programme grows.</p>
         <div class="chartbox" style="height:190px"><canvas id="c-assets" role="img" aria-label="Assets launched per month"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="ctitle">Lead time per asset</div>
-<p class="why"><b>What it shows:</b> efficiency: total lead-time days divided by the number of assets launched that month. <b>How to read it:</b> lower is better. It falls when we ship more assets per brief or move briefs faster. <b>Use it to:</b> see whether bigger batches are actually paying off.</p>
-        <div class="chartbox" style="height:190px"><canvas id="c-dpa" role="img" aria-label="Lead time per asset by month"></canvas></div>
       </div>
     </div>
   </section>
@@ -357,6 +346,17 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
       </div>
       <div class="summary" id="summary"></div>
     </div>
+    <div class="card" id="overview-card">
+      <div class="chead">
+        <div>
+          <div class="ctitle">Status overview for the week</div>
+          <div class="pnote" id="ovsub"></div>
+        </div>
+        <button id="copyov" class="btn-accent" type="button">Copy overview</button>
+      </div>
+      <div class="ovgrid" id="overview"></div>
+    </div>
+
     <div class="card" id="report">
       <div class="chead">
         <div>
@@ -378,16 +378,47 @@ h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ---- Config ---------------------------------------------------------------
+// ---- Settings ---------------------------------------------------------------
+// Every threshold and option lives here. Change a value, commit, and the portal updates.
 // Paste your Cloudflare Worker URL here after deploying worker.js.
 var WORKER_URL = 'https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev';
 var AUTO_REFRESH_MINUTES = 10;
-var TARGET_LEAD_DAYS = 28;   // dashed target line on the Trends chart
-var WIP_LIMIT = 5;           // open sprints per person before it turns red
-var STALLED_DAYS = 60;
-var EXCLUDED_TIERS = ['Commander Crew']; // outlier partners (e.g. Daniel Cormier, James Harrison) left out of all numbers
-var MIN_MONTH_SAMPLE = 5;    // months with fewer launches are faded and not used for trend comparisons
-var MIN_TILE_SAMPLE = 3;     // same idea for the per-stage tiles       // open briefs stuck this long in one stage are left out of workload
+
+// Lead time: counted stage days from Briefing Start to Launch, holds excluded, for launched briefs.
+var LEAD_TIME_METRIC = 'median';   // 'median' | 'average', used for the lead-time number on every tab
+var LEAD_TIME_TODAY_DAYS = 30;     // Today tab: briefs launched in the last N days
+var TARGET_LEAD_DAYS = 28;         // target for the lead time
+
+// Deadlines
+var FILMING_LIMIT = 10;            // days from Brief Sent to Footage Received
+var FOOTAGE_REVIEW_LIMIT = 2;      // days CS has to review footage
+var FOOTAGE_REVIEW_BUSINESS_DAYS = true; // count the footage-review limit in business days (matches the Slack bot)
+var MCT_STUCK_LIMIT = 7;           // days from handoff to launch before an item counts as stuck
+var WIP_LIMIT = 5;                 // open sprints per person before it turns red
+var STALLED_DAYS = 60;             // open briefs stuck this long in one stage count as stalled
+
+// Who is included
+var ROSTER_ONLY_DEFAULT = true;    // "Current roster only": only partners whose Status is Active in the Partners Database
+var EXCLUDED_TIERS = ['Commander Crew']; // outlier tiers left out of all numbers (not the spend check)
+var EXCLUDED_PARTNERS = [];        // individual partners to leave out, e.g. ['Benjamin Smith']
+// Different spellings of the same partner. Keys are compared without dots, commas or case.
+var PARTNER_ALIASES = {
+  'coach juan leija': 'Juan Leija',
+  'the meat mafia podcast': 'Meat Mafia Podcast',
+  'dr kyle gillett md': 'Dr. Kyle Gillett, MD',
+  'dr kyle gillett': 'Dr. Kyle Gillett, MD',
+  'dr latt mansor': 'Dr. Latt Mansor',
+  'dr yasmany dominguez': 'Dr. Yasmany Dominguez'
+};
+// Template or dummy rows in the Brief Library
+var TEMPLATE = /XXX|Partner Name|Week#|Week1\b|\bTEST\b/i;
+var EXCLUDED_STATUSES = ['Archive', 'Test Status'];
+
+// Charts and reports
+var MIN_MONTH_SAMPLE = 5;          // months with fewer launches are faded and not used for trend comparisons
+var MIN_TILE_SAMPLE = 3;           // same idea for the per-stage tiles
+var REPORT_WEEKS = 12, TREND_WEEKS = 8;
+var SPEND_STALE_DAYS = 2;          // spend data older than this skips the spend check
 
 // ---- Stage model ----------------------------------------------------------
 var OWNERS = {
@@ -435,6 +466,28 @@ function maskAsOf(b, asOf) {
   nb.cutOff = cut;
   return nb;
 }
+
+// ---- Lead time (one definition, used everywhere) ---------------------------
+var LEAD_FN = LEAD_TIME_METRIC === 'average' ? function (a) { return avg(a); } : function (a) { return median(a); };
+var LEAD_WORD = LEAD_TIME_METRIC === 'average' ? 'average' : 'median';
+var LEAD_LABEL = 'Lead time (' + LEAD_WORD + ', briefing → launch)';
+// One brief's lead time: counted stage days, holds excluded. Only for launched briefs.
+function leadDays(s) { return s && s.launched ? s.lead : null; }
+// The official number for a list of briefs (or {b, s} report rows).
+function leadTime(list) {
+  var v = list.map(function (x) { return leadDays(x.s); }).filter(function (n) { return n != null; });
+  return v.length ? LEAD_FN(v) : null;
+}
+
+// Business days after `from` up to and including `to` (Mon-Fri).
+function bizDays(from, to) {
+  var a = dayNum(from), b = dayNum(to), n = 0;
+  for (var d = a + 1; d <= b; d++) { var w = new Date(d * 864e5).getUTCDay(); if (w !== 0 && w !== 6) n++; }
+  return n;
+}
+// Footage review days as the limit counts them.
+function reviewDays(s) { return FOOTAGE_REVIEW_BUSINESS_DAYS ? s.reviewBiz : s.days[4]; }
+var REVIEW_UNIT = FOOTAGE_REVIEW_BUSINESS_DAYS ? ' business days' : ' days';
 
 function computeStages(b, asOf) {
   if (asOf) b = maskAsOf(b, asOf);
@@ -491,9 +544,10 @@ function computeStages(b, asOf) {
   var total = days.reduce(function (a, c) { return a + c; }, 0);
   var pbl = days.slice(0, PBL_N).reduce(function (a, c) { return a + c; }, 0);
   var phase = launched || (m && MCT_DONE.indexOf(m.status) >= 0) ? 'done' : current === HOLD || (m && m.status === 'Hold') ? 'hold' : m ? 'mct' : 'pbl';
+  var reviewBiz = sum(spans[4].map(function (p) { return bizDays(p[0], p[1]); }));
   var flags = briefFlags(b, today);
-  flags.byStage = stageFlags(flags, reached, current, days);
-  return { flags: flags, days: days, reached: reached, spans: spans, total: total, pbl: pbl, mct: total - pbl, open: open, current: current, hasMct: !!m, status: status, phase: phase, launched: launched };
+  flags.byStage = stageFlags(flags, reached, current, days, FOOTAGE_REVIEW_BUSINESS_DAYS ? reviewBiz : days[4]);
+  return { reviewBiz: reviewBiz, lead: total - days[HOLD], flags: flags, days: days, reached: reached, spans: spans, total: total, pbl: pbl, mct: total - pbl, open: open, current: current, hasMct: !!m, status: status, phase: phase, launched: launched };
 }
 
 // The send deadline is the 1st of the month written in the brief name ("SEP - ..."), in the year closest
@@ -543,7 +597,6 @@ function briefFlags(b, today) {
   }
   return f;
 }
-var FILMING_LIMIT = 10, FOOTAGE_REVIEW_LIMIT = 2;
 
 function nameMonth(name) {
   var m = String(name || '').toUpperCase().match(/\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\b/);
@@ -551,7 +604,7 @@ function nameMonth(name) {
 }
 
 // Pin each flag to the stage in the stack it belongs to.
-function stageFlags(f, reached, current, days) {
+function stageFlags(f, reached, current, days, reviewD) {
   var by = {};
   function add(j, msg) { (by[j] = by[j] || []).push(msg); }
   function first(list) { for (var i = 0; i < list.length; i++) if (reached[list[i]]) return list[i]; return null; }
@@ -559,20 +612,80 @@ function stageFlags(f, reached, current, days) {
   if (f.sendLate) { var sj = first([2, current, 1, 0]); if (sj != null) add(sj, (f.sent ? 'Sent ' : 'Not sent, ') + f.sendLate + 'd after the ' + fmt(f.sendDeadline) + ' deadline'); }
   if (f.filmLate && reached[3]) add(3, (f.filmDone ? 'Footage took ' : 'Waiting ') + f.filmDays + 'd (limit ' + FILMING_LIMIT + 'd)');
   // CS has FOOTAGE_REVIEW_LIMIT days to review footage once it comes in.
-  if (reached[4] && days[4] > FOOTAGE_REVIEW_LIMIT) {
-    var ongoing = current === 4;
-    add(4, 'Footage review ' + (ongoing ? 'at ' : 'took ') + days[4] + 'd (limit ' + FOOTAGE_REVIEW_LIMIT + 'd)');
-    f.late.push('Footage review ' + (ongoing ? 'at ' : 'took ') + days[4] + 'd (limit ' + FOOTAGE_REVIEW_LIMIT + 'd)');
-    f.reviewLate = days[4] - FOOTAGE_REVIEW_LIMIT;
+  if (reached[4] && reviewD > FOOTAGE_REVIEW_LIMIT) {
+    var ongoing = current === 4, txt = 'Footage review ' + (ongoing ? 'at ' : 'took ') + reviewD + REVIEW_UNIT + ' (limit ' + FOOTAGE_REVIEW_LIMIT + ')';
+    add(4, txt); f.late.push(txt);
+    f.reviewLate = reviewD - FOOTAGE_REVIEW_LIMIT;
   }
   return by;
 }
 
 // ---- State ----------------------------------------------------------------
-var ALL = [], VIEW = [], SELECTED = null;
+var ALL = [], BASE = [], VIEW = [], SELECTED = null;
+var ROSTER_ONLY = ROSTER_ONLY_DEFAULT;
+try { var rs = localStorage.getItem('plt:roster'); if (rs != null) ROSTER_ONLY = rs === '1'; } catch (e) {}
+var ROSTER = null; // { byId, byKey } of Active partners, when the spend call succeeded
+var EXCLUDED_KEYS = EXCLUDED_PARTNERS.map(function (n) { return partnerKey(n); });
+var PBL_DATES = ['briefingStart', 'briefReview', 'briefReady', 'briefSent', 'footageReceived', 'revisionsStart', 'revisionsReceived', 'contentApproved'];
+
+// The partner a brief belongs to: its Portal Partner link, then Sent To, then the name ("SEP - Name - …").
+function briefPartnerName(b) {
+  if (b.partner) return b.partner;
+  var parts = String(b.name || '').split(/\s*-\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
+  var i = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|mon|challenge)/i.test(parts[0] || '') ? 1 : 0;
+  if (parts[i] && /^(ignite|boost)$/i.test(parts[i])) i++;
+  return parts[i] || '';
+}
+function rosterPartner(b) {
+  if (!ROSTER) return null;
+  return (b.portalPartner && ROSTER.byId[b.portalPartner]) || ROSTER.byKey[partnerKey(briefPartnerName(b))] || null;
+}
+function notOnRosterTag(b) { return ROSTER && !ROSTER_ONLY && !b.onRoster ? '<span class="tag">Not on roster</span>' : ''; }
+
+// RAW → BASE (cleaned, stages computed) → ALL (roster applied). Every tab reads ALL.
+function buildBase() {
+  ROSTER = null;
+  if (SPEND && !SPEND.error && SPEND.partners) {
+    ROSTER = { byId: {}, byKey: {} };
+    SPEND.partners.forEach(function (p) { ROSTER.byId[p.id] = p; ROSTER.byKey[partnerKey(p.name)] = p; });
+  }
+  BASE = RAW.filter(function (b) {
+    if (TEMPLATE.test(b.name || '')) return false;
+    if (EXCLUDED_STATUSES.indexOf(b.status) >= 0) return false;
+    if (!PBL_DATES.some(function (k) { return b.d[k]; }) && !(b.mct && !b.mct.missing)) return false; // no milestone dates at all
+    return true;
+  }).map(function (b) {
+    b.name = b.name || 'Untitled brief';
+    if (!b.s) b.s = computeStages(b);
+    var rp = rosterPartner(b);
+    b.onRoster = !!rp;
+    b.partnerKey = rp ? partnerKey(rp.name) : partnerKey(briefPartnerName(b));
+    b.partnerTier = rp ? rp.tier : b.tier;
+    return b;
+  }).filter(function (b) {
+    return EXCLUDED_TIERS.indexOf(b.tier) < 0 && EXCLUDED_TIERS.indexOf(b.partnerTier) < 0 && EXCLUDED_KEYS.indexOf(b.partnerKey) < 0;
+  });
+  // One display name per partner: the Partners Database name, else the alias target, else the most complete spelling seen.
+  var names = {};
+  Object.keys(PARTNER_ALIASES).forEach(function (k) { names[partnerKey(k)] = PARTNER_ALIASES[k]; });
+  if (ROSTER) Object.keys(ROSTER.byId).forEach(function (id) { var p = ROSTER.byId[id]; names[partnerKey(p.name)] = p.name; });
+  var seen = {};
+  BASE.forEach(function (b) { var raw = briefPartnerName(b); if (!raw) return; var cur = seen[b.partnerKey]; if (!cur || raw.length > cur.length) seen[b.partnerKey] = raw; });
+  BASE.forEach(function (b) { b.partnerName = names[b.partnerKey] || seen[b.partnerKey] || ''; });
+}
+function buildAll() {
+  var useRoster = ROSTER_ONLY && ROSTER;
+  ALL = useRoster ? BASE.filter(function (b) { return b.onRoster; }) : BASE;
+  var hidden = BASE.length - ALL.length, note = $('rosternote');
+  if (ROSTER_ONLY && !ROSTER) { note.hidden = false; note.textContent = 'Roster unavailable (the Partners Database didn\'t load), so all partners are shown.'; }
+  else if (useRoster && hidden) { note.hidden = false; note.textContent = hidden + ' briefs from partners not on the current roster are hidden. Untick "Current roster only" to see them.'; }
+  else note.hidden = true;
+}
+function rebuild() {
+  buildAll();
+  applyFilters(); renderReport(); renderOverview(); renderSpend(); markDirty();
+}
 var $ = function (id) { return document.getElementById(id); };
-// Blank template rows in the library ("FBXXX - Partner Name").
-var TEMPLATE = /XXX|Partner Name/i;
 var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
@@ -584,18 +697,22 @@ function legend() {
   }).join('');
 }
 
+// Every filter except the start date (lead time filters on launch date instead).
+function passesFilters(x) {
+  var q = $('q').value.trim().toLowerCase(), mo = $('month').value, pr = $('product').value, ph = $('phase').value;
+  if (q && (x.name + ' ' + (x.partner || '')).toLowerCase().indexOf(q) < 0) return false;
+  if (mo && x.month !== mo) return false;
+  if (pr && (x.product || []).indexOf(pr) < 0) return false;
+  if (ph === 'flag' ? !x.s.flags.late.length : ph && x.s.phase !== ph) return false;
+  return true;
+}
 function applyFilters() {
-  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null;
-  var q = $('q').value.trim().toLowerCase(), mo = $('month').value, pr = $('product').value, ph = $('phase').value, so = $('sort').value;
+  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null, so = $('sort').value;
   VIEW = ALL.filter(function (x) {
     if (since != null && dayNum(x.d.created || x.createdTime) < since) return false;
-    if (q && (x.name + ' ' + (x.partner || '')).toLowerCase().indexOf(q) < 0) return false;
-    if (mo && x.month !== mo) return false;
-    if (pr && (x.product || []).indexOf(pr) < 0) return false;
-    if (ph === 'flag' ? !x.s.flags.late.length : ph && x.s.phase !== ph) return false;
-    return true;
+    return passesFilters(x);
   });
-  VIEW.sort(so === 'long' ? function (a, b) { return b.s.total - a.s.total; }
+  VIEW.sort(so === 'long' ? function (a, b) { return b.s.lead - a.s.lead; }
     : so === 'name' ? function (a, b) { return a.name.localeCompare(b.name); }
     : function (a, b) { return (b.d.created || b.createdTime) < (a.d.created || a.createdTime) ? -1 : 1; });
   renderRows(); renderAvgRow(); renderKpis(); renderAverages();
@@ -639,8 +756,8 @@ function renderAvgRow() {
   var bar = st.filter(function (x) { return x.j < PBL_N; }).map(seg).join('') + '<div class="hand" data-hand="1"></div>' + st.filter(function (x) { return x.j >= PBL_N; }).map(seg).join('');
   $('avgrow').innerHTML = '<div class="avgrow"><div class="srow"><span class="lbl2"><b>Average brief</b>' + VIEW.length + ' briefs ' + rangeLabel() + '</span>' +
     '<div style="flex:1;display:flex;min-width:0"><div class="sbar" style="flex:1">' + bar + '</div></div>' +
-    '<span style="width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">' + r1(pbl + mct) + 'd</span></div>' +
-    '<div class="pnote">' + r1(pbl) + 'd in the Brief Library + ' + r1(mct) + 'd in the MCT. Each segment is that stage\'s average for briefs that finished it, so the total is a typical brief end to end. Change the start-date filter above to use a different period.</div></div>';
+    '<span style="width:60px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600" title="Stage averages added up">Σ ' + r1(pbl + mct) + 'd</span></div>' +
+    '<div class="pnote">' + r1(pbl) + 'd in the Brief Library + ' + r1(mct) + 'd in the MCT. Each segment is that stage\'s average for briefs that finished it, and Σ adds them up. That is not the official lead time (shown in the cards above as the ' + LEAD_WORD + ' of actual launched briefs). Change the start-date filter above to use a different period.</div></div>';
 }
 
 function renderRows() {
@@ -655,10 +772,10 @@ function renderRows() {
       for (j = PBL_N; j < STAGES.length; j++) bar += seg(x, j);
     }
     var fl = x.s.flags.late.length ? '<span class="flag" data-flag="' + x.id + '">⚑</span>' : '';
-    return '<div class="srow" data-id="' + x.id + '"><span style="width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(x.name) + '">' + fl + esc(x.name) + '</span>' +
+    return '<div class="srow" data-id="' + x.id + '"><span style="width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(x.name) + '">' + fl + esc(x.name) + notOnRosterTag(x) + '</span>' +
       (bar ? '<div style="flex:1;display:flex;min-width:0"><div class="sbar" style="flex:' + Math.max(t, 0.5) + '">' + bar + '</div><div style="flex:' + Math.max(max - t, 0) + '"></div></div>'
         : '<div style="flex:1;font-size:11px;color:var(--text-muted)">Briefing not started</div>') +
-      '<span style="width:34px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">' + t + 'd' + (x.s.open ? '<span class="live" title="Still in progress"></span>' : '') + '</span></div>';
+      '<span style="width:34px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums" title="Counted days, briefing → ' + (x.s.launched ? 'launch' : 'today') + ', holds excluded">' + x.s.lead + 'd' + (x.s.open ? '<span class="live" title="Still in progress"></span>' : '') + '</span></div>';
   }).join('');
   rows.innerHTML = html;
 }
@@ -668,8 +785,8 @@ function show(id) {
   document.querySelectorAll('.srow').forEach(function (e) { e.classList.toggle('on', e.dataset.id === id); });
   var x = ALL.filter(function (b) { return b.id === id; })[0]; if (!x) return;
   var s = x.s, t = s.total || 1;
-  $('title').textContent = x.name;
-  $('total').textContent = s.hasMct ? s.pbl + 'd in PBL + ' + s.mct + 'd in MCT = ' + s.total + ' days' : s.pbl + 'd in PBL' + (s.open ? ' so far' : '') + ' · not yet in MCT';
+  $('title').innerHTML = esc(x.name) + notOnRosterTag(x);
+  $('total').textContent = s.hasMct ? s.pbl + 'd in the Brief Library + ' + mctWork(s) + 'd in production = ' + s.lead + ' days' + (s.launched ? ' lead time' : ' so far') + (s.days[HOLD] ? ' (' + s.days[HOLD] + 'd on hold not counted)' : '') : s.pbl + 'd in the Brief Library' + (s.open ? ' so far' : '') + ' · not yet in the MCT';
   var meta = ['PBL status: ' + esc(x.status)];
   if (x.mct && !x.mct.missing) meta.push('MCT status: ' + esc(x.mct.status));
   if (x.partner) meta.push('Partner: ' + esc(x.partner));
@@ -730,13 +847,16 @@ function avg(a) { return a.length ? sum(a) / a.length : null; }
 function r1(n) { return n == null ? '–' : (Math.round(n * 10) / 10).toString(); }
 
 function renderKpis() {
+  // Lead time uses briefs *launched* in the chosen period, with the other filters applied.
+  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null;
+  var launchedIn = ALL.filter(function (x) { return x.s.launched && passesFilters(x) && (since == null || dayNum(x.mct.d.launch) >= since); });
   var handed = VIEW.filter(function (x) { return x.s.hasMct; });
-  var launched = VIEW.filter(function (x) { return x.s.launched; });
+  var lt = leadTime(launchedIn);
   var cards = [
     ['Briefs shown', VIEW.length, VIEW.filter(function (x) { return x.s.open; }).length + ' in progress'],
-    ['Avg days in PBL', r1(avg(handed.map(function (x) { return x.s.pbl; }))), 'n=' + handed.length + ' handed off'],
-    ['Avg days in MCT', r1(avg(launched.map(function (x) { return x.s.mct; }))), 'n=' + launched.length + ' launched'],
-    ['Avg end to end', r1(avg(launched.map(function (x) { return x.s.total; }))), 'request → launch']
+    [LEAD_LABEL, r1(lt), launchedIn.length + ' launched ' + (range ? 'in the last ' + range + ' days' : 'in total') + ' · target ' + TARGET_LEAD_DAYS],
+    ['Brief Library phase (' + LEAD_WORD + ')', r1(LEAD_FN(handed.map(function (x) { return x.s.pbl; }))), handed.length + ' handed off to the MCT'],
+    ['Production phase (' + LEAD_WORD + ')', r1(LEAD_FN(launchedIn.map(function (x) { return mctWork(x.s); }))), 'MCT days, holds excluded']
   ];
   $('kpis').innerHTML = cards.map(function (c) {
     return '<div class="kpi"><div class="l">' + c[0] + '</div><div class="v">' + c[1] + (typeof c[1] === 'string' && c[1] !== '–' ? '<small>days</small>' : '') + '</div><div class="pnote">' + c[2] + '</div></div>';
@@ -774,7 +894,6 @@ function renderPhaseBars(id, fn, label) {
 // ---- Weekly report (every Wednesday) ---------------------------------------
 // A report dated Wednesday D covers the 7 days before it (Wed D-7 to Tue D-1), rebuilt as of that Tuesday,
 // so past reports don't change as briefs move on. The newest report appears automatically each Wednesday.
-var MCT_STUCK_LIMIT = 7, REPORT_WEEKS = 12, TREND_WEEKS = 8;
 var REPORT_CACHE = {};
 function isoOf(n) { return new Date(n * 864e5).toISOString().slice(0, 10); }
 function reportWednesdays() {
@@ -805,9 +924,9 @@ function reportFor(wed) {
     .map(function (x) { return { x: x, late: x.s.flags.filmLate }; }));
   // 3. CS: footage review longer than FOOTAGE_REVIEW_LIMIT days
   var rv = metric(S.filter(function (x) { var sp = x.s.spans[4]; return sp.length && x.s.current !== 4 && inRange(sp[sp.length - 1][1], start, end); })
-    .map(function (x) { return { x: x, late: x.s.days[4] - FOOTAGE_REVIEW_LIMIT }; }),
-    S.filter(function (x) { return x.s.current === 4 && x.s.days[4] > FOOTAGE_REVIEW_LIMIT; })
-    .map(function (x) { return { x: x, late: x.s.days[4] - FOOTAGE_REVIEW_LIMIT }; }));
+    .map(function (x) { return { x: x, late: reviewDays(x.s) - FOOTAGE_REVIEW_LIMIT }; }),
+    S.filter(function (x) { return x.s.current === 4 && reviewDays(x.s) > FOOTAGE_REVIEW_LIMIT; })
+    .map(function (x) { return { x: x, late: reviewDays(x.s) - FOOTAGE_REVIEW_LIMIT }; }));
   // 4. MCT: more than MCT_STUCK_LIMIT days from handoff to launch (holds excluded from "right now")
   var mc = metric(S.filter(function (x) { return x.s.launched && x.b.mct && inRange(x.b.mct.d.launch, start, end); })
     .map(function (x) { return { x: x, late: mctWork(x.s) - MCT_STUCK_LIMIT }; }),
@@ -833,7 +952,7 @@ function reportFor(wed) {
   var active = live.filter(function (x) { return stalled.indexOf(x) < 0; });
   var r = { wed: wed, start: start, end: end, cs: cs, pt: pt, rv: rv, mc: mc, steps: steps,
     launched: launches.length, assets: sum(launches.map(function (x) { return +x.b.mct.assets || 0; })),
-    leadAvg: avg(launches.map(function (x) { return x.s.total; })),
+    lead: leadTime(launches),
     inPbl: active.filter(function (x) { return x.s.current < PBL_N; }).length,
     inMct: active.filter(function (x) { return x.s.current >= PBL_N && x.s.current !== HOLD; }).length,
     onHold: active.filter(function (x) { return x.s.current === HOLD; }).length, stalled: stalled.length, active: active };
@@ -844,7 +963,7 @@ function reportFor(wed) {
 var REPORT_METRICS = [
   ['cs', 'Briefs ready past due date', 'CS', 'Brief Ready Date after Brief Due Date', 'ready this week', 'past due, not ready'],
   ['pt', 'Late partner footage', 'Partner', 'Footage received more than ' + FILMING_LIMIT + ' days after the brief was sent', 'received this week', 'waiting over ' + FILMING_LIMIT + 'd'],
-  ['rv', 'Footage review over ' + FOOTAGE_REVIEW_LIMIT + ' days', 'CS', 'Footage Received to the next step', 'reviewed this week', 'in review over ' + FOOTAGE_REVIEW_LIMIT + 'd'],
+  ['rv', 'Footage review over ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT, 'CS', 'Footage Received to the next step', 'reviewed this week', 'in review over ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT],
   ['mc', 'Stuck in MCT over ' + MCT_STUCK_LIMIT + ' days', 'MCT', 'Handoff to launch, time on hold not counted', 'launched this week', 'in MCT over ' + MCT_STUCK_LIMIT + 'd']
 ];
 
@@ -908,7 +1027,7 @@ function summaryModel() {
 
   var head = [];
   head.push('**' + r.launched + ' partner creatives launched** (' + r.assets + ' assets), ' + vsAvg(r.launched, wk('launched')) + '.');
-  if (r.leadAvg != null) head.push('Lead time: **' + r1(r.leadAvg) + ' days** from briefing to launch vs a ' + TARGET_LEAD_DAYS + '-day target' + (r.leadAvg > TARGET_LEAD_DAYS ? ' (' + r1(r.leadAvg - TARGET_LEAD_DAYS) + ' days over)' : ' (on target)') + '.');
+  if (r.lead != null) head.push('Lead time (' + LEAD_WORD + ', briefing → launch): **' + r1(r.lead) + ' days** vs a ' + TARGET_LEAD_DAYS + '-day target' + (r.lead > TARGET_LEAD_DAYS ? ' (' + r1(r.lead - TARGET_LEAD_DAYS) + ' days over)' : ' (on target)') + '.');
   head.push('In progress: **' + r.inPbl + '** in briefing/filming, **' + r.inMct + '** in production, ' + r.onHold + ' on hold.' + (r.stalled ? ' ' + r.stalled + ' more have stalled ' + STALLED_DAYS + '+ days and should be closed or archived.' : ''));
   sec.push(['Headline', head]);
 
@@ -969,7 +1088,6 @@ $('copysum').addEventListener('click', function () {
 
 // ---- Spend check (read-only) ---------------------------------------------
 var RAW = [], SPEND = null;
-var SPEND_STALE_DAYS = 2;
 var TIER_ORDER = ['Commander Crew', 'Flight Crew', 'Medical Advisor', 'Podcaster', 'Pathfinder Crew'];
 var S_READY = ['Resize + Upload', 'Growth QA', 'Ready To Build', 'Built - Needs Review'];
 var S_REVIEW = ['V1 Review', 'Final Review', 'Ready For Exec. Review', 'In Exec. Review'];
@@ -977,7 +1095,12 @@ var S_PROD = ['Needs CS Briefing', 'Briefing', 'Review Brief', 'Needs Brief Edit
 var S_ORDER = S_PROD.slice(0, 6).concat(['V1 Review', 'Needs Revision', 'Revising', 'Final Review', 'Ready For Exec. Review', 'In Exec. Review'], S_READY, ['Launched']);
 var B_WAITING = ['Sent To Partner', 'Edits Requested', 'Revising Footage'];
 var B_CLOSED = ['Complete', 'Archive', 'Test Status'];
-function normName(n) { return String(n || '').toLowerCase().replace(/\b(dr|coach|the|md)\b\.?/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+// Partner matching: drop dots/commas/case, then map known alternate spellings to one name.
+function partnerClean(n) { return String(n || '').toLowerCase().replace(/[.,]/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim(); }
+var ALIAS_KEYS = {};
+Object.keys(PARTNER_ALIASES).forEach(function (k) { ALIAS_KEYS[partnerClean(k)] = partnerClean(PARTNER_ALIASES[k]); });
+function partnerKey(n) { var c = partnerClean(n); return ALIAS_KEYS[c] || c; }
+var normName = partnerKey;
 function stageRank(st) { var i = S_ORDER.indexOf(st); return i < 0 ? -1 : i; }
 function plural(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
 function slackDate(iso) { var d = new Date(dayNum(iso) * 864e5); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', timeZone: 'UTC' }); }
@@ -1151,17 +1274,18 @@ function whoFor(b, j) {
 }
 function mctWork(s) { return s.mct - s.days[HOLD]; } // production days, holds excluded
 function stageLimit(j) { return j === 3 ? FILMING_LIMIT : j === 4 ? FOOTAGE_REVIEW_LIMIT : null; }
+function limitDays(s, j) { return j === 4 ? reviewDays(s) : s.days[j]; }
 
 function briefNote(x) {
   var s = x.s, j = s.current, parts = [];
   if (!s.reached.some(Boolean)) return 'Briefing hasn\'t started yet.';
-  if (s.launched) parts.push('Launched ' + fmt(x.mct.d.launch) + ' after **' + s.total + ' days** (' + s.pbl + ' in the Brief Library, ' + s.mct + ' in production).');
+  if (s.launched) parts.push('Launched ' + fmt(x.mct.d.launch) + ' with a lead time of **' + s.lead + ' days** (' + s.pbl + ' in the Brief Library, ' + mctWork(s) + ' in production).');
   else if (j === HOLD) parts.push('**On hold** for ' + s.days[HOLD] + ' days.');
   else if (j != null) {
-    var d = s.days[j], lim = stageLimit(j);
-    parts.push('Now in **' + STAGES[j][0] + '** with ' + whoFor(x, j) + ' for ' + (d === 0 ? 'under a day' : d + (d === 1 ? ' day' : ' days')) + (lim && d > lim ? ', ' + (d - lim) + ' days past the ' + lim + '-day limit' : '') + '.');
+    var d = s.days[j], lim = stageLimit(j), ld = limitDays(s, j);
+    parts.push('Now in **' + STAGES[j][0] + '** with ' + whoFor(x, j) + ' for ' + (d === 0 ? 'under a day' : d + (d === 1 ? ' day' : ' days')) + (lim && ld > lim ? ', ' + (ld - lim) + (j === 4 ? REVIEW_UNIT : ' days') + ' past the ' + lim + (j === 4 ? REVIEW_UNIT.replace(' days', '-day') : '-day') + ' limit' : '') + '.');
     if (d > STALLED_DAYS) parts.push('Nothing has moved in over ' + STALLED_DAYS + ' days, so this brief probably needs to be closed or archived.');
-  } else parts.push('Closed after ' + s.total + ' days.');
+  } else parts.push('Closed after ' + s.lead + ' days.');
   var big = -1, bj = null;
   s.days.forEach(function (v, k) { if (k !== HOLD && v > big) { big = v; bj = k; } });
   if (bj != null && big > 0 && bj !== j) parts.push('Slowest step so far: ' + STAGES[bj][0] + ' (' + STAGES[bj][1] + ', ' + big + ' days).');
@@ -1180,7 +1304,7 @@ function overviewModel() {
   var stand = [
     '**' + act.length + ' briefs in progress:** ' + r.inPbl + ' in briefing/filming, ' + r.inMct + ' in production, ' + r.onHold + ' on hold.',
     'Waiting on: ' + owners.map(function (o) { return o + ' ' + byOwner[o]; }).join(' · ') + '.',
-    'This week: ' + r.launched + ' launched (' + r.assets + ' assets)' + (r.leadAvg != null ? ', averaging ' + r1(r.leadAvg) + ' days from briefing to launch vs a ' + TARGET_LEAD_DAYS + '-day target' : '') + '.'
+    'This week: ' + r.launched + ' launched (' + r.assets + ' assets)' + (r.lead != null ? ', lead time (' + LEAD_WORD + ', briefing → launch) ' + r1(r.lead) + ' days vs a ' + TARGET_LEAD_DAYS + '-day target' : '') + '.'
   ];
   if (r.stalled) stand.push(r.stalled + ' more briefs haven\'t moved in ' + STALLED_DAYS + '+ days and are left out of these numbers.');
   box.push(['Where things stand', stand]);
@@ -1209,7 +1333,7 @@ function overviewModel() {
   var slower = r.steps.filter(function (x) { return x.j !== HOLD && x.now != null && x.prev != null && x.nNow >= 3 && x.now - x.prev >= 2; })
     .sort(function (a, b) { return (b.now - b.prev) - (a.now - a.prev); });
   slower.slice(0, 1).forEach(function (x) { probs.push({ k: 'slow' + x.j, j: x.j, score: (x.now - x.prev) / 3, txt: STAGES[x.j][0] + ' (' + STAGES[x.j][1] + ') has slowed from ' + r1(x.prev) + ' to ' + r1(x.now) + ' days over the last 4 weeks.' }); });
-  if (r.leadAvg != null && r.leadAvg > TARGET_LEAD_DAYS * 1.25) probs.push({ k: 'lead', score: (r.leadAvg - TARGET_LEAD_DAYS) / 10, txt: 'Lead time is ' + r1(r.leadAvg) + ' days, ' + Math.round((r.leadAvg / TARGET_LEAD_DAYS - 1) * 100) + '% over the ' + TARGET_LEAD_DAYS + '-day target.' });
+  if (r.lead != null && r.lead > TARGET_LEAD_DAYS * 1.25) probs.push({ k: 'lead', score: (r.lead - TARGET_LEAD_DAYS) / 10, txt: 'Lead time (' + LEAD_WORD + ') is ' + r1(r.lead) + ' days, ' + Math.round((r.lead / TARGET_LEAD_DAYS - 1) * 100) + '% over the ' + TARGET_LEAD_DAYS + '-day target.' });
   if (r.stalled >= 5) probs.push({ k: 'stalled', score: r.stalled / 10, txt: r.stalled + ' stalled briefs are clogging the pipeline and skewing the numbers.' });
   probs.sort(function (a, b) { return b.score - a.score; });
   box.push(['Biggest problems', probs.slice(0, 4).map(function (p) { return p.txt; })]);
@@ -1250,7 +1374,7 @@ function overviewModel() {
     var j = x.s.current; if (j == null || j === HOLD || !x.s.open) return;
     var d = x.s.days[j]; if (d > STALLED_DAYS) return;
     var why = null, over = 0, lim = stageLimit(j);
-    if (x.s.flags.byStage[j]) { why = x.s.flags.byStage[j][0]; over = lim ? d - lim : d; }
+    if (x.s.flags.byStage[j]) { why = x.s.flags.byStage[j][0]; over = lim ? limitDays(x.s, j) - lim : d; }
     else if (j >= PBL_N && mctWork(x.s) > MCT_STUCK_LIMIT * 2) { why = mctWork(x.s) + ' days in production (limit ' + MCT_STUCK_LIMIT + ', holds excluded)'; over = mctWork(x.s) - MCT_STUCK_LIMIT; }
     if (why) now.push({ x: x, j: j, why: why, over: over });
   });
@@ -1263,7 +1387,7 @@ var OV_ALL = false;
 function renderOverview() {
   if (!ALL.length) return;
   var m = overviewModel();
-  $('ovsub').textContent = 'Weekly snapshot for Wed ' + fmt(m.wed) + ' (as of ' + fmt(m.asOf) + ') · refreshes every Wednesday · all partner briefs, not just the filters above. "Needs your attention now" is checked live.';
+  $('ovsub').textContent = 'Snapshot for the report dated Wed ' + fmt(m.wed) + ' (as of ' + fmt(m.asOf) + ') · a new one every Wednesday. "Needs your attention now" is checked live.';
   var h = m.box.map(function (b) {
     return '<div class="ovbox"><h4>' + esc(b[0]) + '</h4><ul>' + (b[1].length ? b[1] : ['Nothing to report.']).map(function (l) { return '<li>' + esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</li>'; }).join('') + '</ul></div>';
   }).join('');
@@ -1284,6 +1408,7 @@ function overviewText() {
 $('overview').addEventListener('click', function (e) {
   if (e.target.id === 'ovmore') { OV_ALL = !OV_ALL; renderOverview(); return; }
   var a = e.target.closest('.act'); if (!a) return;
+  setTab('timeline', true);
   if (!VIEW.some(function (x) { return x.id === a.dataset.id; })) { $('range').value = ''; $('month').value = ''; $('product').value = ''; $('phase').value = ''; $('q').value = ''; applyFilters(); }
   show(a.dataset.id);
   var row = document.querySelector('.srow[data-id="' + a.dataset.id + '"]'); if (row) row.scrollIntoView({ block: 'nearest' });
@@ -1370,7 +1495,11 @@ function renderTrends() {
   var M = monthBuckets(WINDOW_MONTHS), groups = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
   var pbl = groups.map(function (g) { return g.length ? avg(g.map(function (x) { return x.s.pbl; })) : null; });
   var mct = groups.map(function (g) { return g.length ? avg(g.map(function (x) { return x.s.mct; })) : null; });
-  var tot = groups.map(function (g) { return g.length ? avg(g.map(function (x) { return x.s.total; })) : null; });
+  // Bar height = the official lead time for that month; split between the two libraries in proportion.
+  var tot = groups.map(function (g) { return g.length ? leadTime(g) : null; });
+  var rawP = pbl, rawM = mct;
+  pbl = tot.map(function (t, i) { return t == null ? null : t * rawP[i] / ((rawP[i] + rawM[i]) || 1); });
+  mct = tot.map(function (t, i) { return t == null ? null : t - pbl[i]; });
   $('targetlbl').textContent = 'Target ' + TARGET_LEAD_DAYS + 'd';
   document.querySelectorAll('.tgt').forEach(function (e) { e.textContent = TARGET_LEAD_DAYS + '-day'; });
   chart('c-lead', {
@@ -1384,7 +1513,7 @@ function renderTrends() {
       scales: Object.assign(baseOpts().scales, { x: Object.assign(baseOpts().scales.x, { stacked: true }), y: Object.assign(baseOpts(function (v) { return v + 'd'; }).scales.y, { stacked: true }) }),
       plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
         label: function (c) { return c.dataset.label + ': ' + (c.raw == null ? '–' : c.raw + 'd'); },
-        footer: function (items) { var i = items[0].dataIndex; return tot[i] == null ? 'No launches' : 'Total ' + r1(tot[i]) + 'd · ' + groups[i].length + ' launched' + (groups[i].length < MIN_MONTH_SAMPLE ? ' (too few to compare)' : ''); } } }) })
+        footer: function (items) { var i = items[0].dataIndex; return tot[i] == null ? 'No launches' : 'Lead time (' + LEAD_WORD + ') ' + r1(tot[i]) + 'd · ' + groups[i].length + ' launched' + (groups[i].length < MIN_MONTH_SAMPLE ? ' (too few to compare)' : ''); } } }) })
     })
   });
 
@@ -1408,7 +1537,7 @@ function renderTrends() {
   var kp = [];
   if (lastI >= 0) {
     var d = tot[lastI] - tot[firstI], better = d <= 0;
-    kp.push('<div class="kpi"><div class="l">Avg lead time · ' + M[lastI].label + '</div><div class="v">' + r1(tot[lastI]) + '<small>days</small></div><div class="pnote" style="color:' + (firstI === lastI ? 'var(--text-muted)' : better ? 'var(--good)' : 'var(--text-danger)') + '">' + (firstI === lastI ? groups[lastI].length + ' launched' : (better ? '▼ ' : '▲ +') + r1(d) + 'd vs ' + M[firstI].label) + '</div></div>');
+    kp.push('<div class="kpi"><div class="l">' + LEAD_LABEL + ' · ' + M[lastI].label + '</div><div class="v">' + r1(tot[lastI]) + '<small>days</small></div><div class="pnote" style="color:' + (firstI === lastI ? 'var(--text-muted)' : better ? 'var(--good)' : 'var(--text-danger)') + '">' + (firstI === lastI ? groups[lastI].length + ' launched' : (better ? '▼ ' : '▲ +') + r1(d) + 'd vs ' + M[firstI].label) + '</div></div>');
     var pct = firstI !== lastI && tot[firstI] ? Math.round((tot[lastI] - tot[firstI]) / tot[firstI] * 100) : null;
     kp.push('<div class="kpi ' + (pct == null ? '' : pct <= 0 ? 'good' : 'bad') + '"><div class="l">Change since ' + M[firstI].label + '</div><div class="v">' + (pct == null ? '–' : (pct > 0 ? '+' : '') + pct + '%') + '</div><div class="pnote">' + WINDOW_MONTHS + '-month trend · ' + sum(groups.map(function (g) { return g.length; })) + ' launched</div></div>');
   } else {
@@ -1468,7 +1597,7 @@ function renderDeadlines() {
     var due = x.d.footageDue; if (!due || due < from || due > today) return;
     var got = x.d.footageReceived, late = dayNum(got || today) - dayNum(due);
     if (!got && (late <= 0 || late > STALLED_DAYS)) return; // not due yet, or long-abandoned
-    var who = x.partner || x.name.split(' - ')[1] || 'Unknown';
+    var who = (x.partnerName || 'Unknown') + (ROSTER && !x.onRoster ? ' (not on roster)' : '');
     (per[who] = per[who] || []).push({ late: late, x: x, open: !got });
   });
   var prs = Object.keys(per).map(function (k) { return { k: k, a: avg(per[k].map(function (r) { return r.late; })), n: per[k].length, rows: per[k] }; })
@@ -1509,18 +1638,11 @@ function renderDeadlines() {
   // Throughput and lead time per asset, by launch month
   var lg = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
   var assets = lg.map(function (g) { return sum(g.map(function (x) { return +x.mct.assets || 0; })); });
-  var dpa = lg.map(function (g, i) { return assets[i] ? r1n(sum(g.map(function (x) { return x.s.total; })) / assets[i]) : null; });
   chart('c-assets', {
     type: 'bar',
     data: { labels: M.map(function (m) { return m.label; }), datasets: [{ label: 'Assets', data: assets, backgroundColor: '#FF5600', borderRadius: 4, maxBarThickness: 28 }] },
     options: baseOpts(function (v) { return v; }, { plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
       label: function (c) { return c.raw + ' assets'; }, footer: function (it) { return lg[it[0].dataIndex].length + ' MCT items launched'; } } }) }) })
-  });
-  chart('c-dpa', {
-    type: 'line',
-    data: { labels: M.map(function (m) { return m.label; }), datasets: [{ label: 'Days per asset', data: dpa, borderColor: '#FF5600', borderWidth: 2, tension: .3, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: '#FF5600', spanGaps: true }] },
-    options: baseOpts(function (v) { return v + 'd'; }, { plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
-      label: function (c) { return c.raw == null ? 'No launches' : c.raw + ' days per asset'; }, footer: function (it) { var i = it[0].dataIndex; return assets[i] + ' assets · ' + lg[i].length + ' items'; } } }) }) })
   });
 }
 
@@ -1582,7 +1704,7 @@ var CACHE_KEY = 'partner-lead-times:v1';
 function ingest(json, cached) {
   RAW = json.briefs || []; SPEND = json.spend || null;
   if (!cached) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch (e) {} }
-  ALL = json.briefs.filter(function (b) { return !TEMPLATE.test(b.name || '') && EXCLUDED_TIERS.indexOf(b.tier) < 0; }).map(function (b) { b.name = b.name || 'Untitled brief'; b.s = computeStages(b); return b; });
+  buildBase(); buildAll();
   var months = {}, products = {};
   ALL.forEach(function (b) { if (b.month) months[b.month] = 1; (b.product || []).forEach(function (p) { products[p] = 1; }); });
   fillSelect($('month'), MONTHS.filter(function (m) { return months[m]; }));
@@ -1608,6 +1730,12 @@ function refresh() {
   }).then(function () { loading = false; $('refresh').textContent = 'Refresh'; });
 }
 $('refresh').addEventListener('click', refresh);
+$('rosteronly').checked = ROSTER_ONLY;
+$('rosteronly').addEventListener('change', function () {
+  ROSTER_ONLY = this.checked;
+  try { localStorage.setItem('plt:roster', ROSTER_ONLY ? '1' : '0'); } catch (e) {}
+  if (RAW.length) rebuild();
+});
 setInterval(function () { if (!document.hidden) refresh(); }, AUTO_REFRESH_MINUTES * 60e3);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && ALL.length) refresh(); });
 
