@@ -3,3 +3,8 @@
 *.key
 .notion_key
 .DS_Store
+
+# Local working files (never publish)
+.dev/
+lead-time-dashboard/
+portal-screenshots/
