@@ -30,6 +30,10 @@ a{color:var(--accent)}
 .pt{background:#FACC15;color:#1F1600}.ed{background:#22C55E;color:#03170A}.gr{background:#22D3EE;color:#03191D}
 .hold{background:repeating-linear-gradient(45deg,#5A5A5A 0 4px,#2A2A2A 4px 8px);color:#eee}
 
+/* Phase colours (text on colour is always dark) */
+.ph-brief{background:#5B8DEF;color:#0F0D0B}.ph-film{background:#F2C94C;color:#0F0D0B}.ph-review{background:#F0A6C8;color:#0F0D0B}
+.ph-edit{background:#2FA66A;color:#0F0D0B}.ph-launch{background:#B48CF2;color:#0F0D0B}.ph-hold{background:#4A4541;color:#F3EEE8}
+.ph-queue{background:repeating-linear-gradient(135deg,#2FA66A 0 5px,#1F7A4C 5px 10px)}
 /* From the reference mockup */
 .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px;vertical-align:-1px}
 .srow{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;border:0.5px solid transparent}
@@ -445,6 +449,20 @@ var STAGES = [
   ['Growth QA to launch', 'Growth', 'gr', 'Growth QA · Ready To Build'],
   ['On hold', 'Paused', 'hold', 'Hold']
 ];
+// Five phases on top of the 17 stages (stage indexes into STAGES). Colours differ in lightness as well as hue.
+var PHASES = [
+  { key: 'brief',  name: 'Brief',     owner: 'CS',      color: '#5B8DEF', stages: [0, 1, 2] },
+  { key: 'film',   name: 'Filming',   owner: 'Partner', color: '#F2C94C', stages: [3, 5] },
+  { key: 'review', name: 'CS review', owner: 'CS',      color: '#F0A6C8', stages: [4, 6, 7] },
+  { key: 'edit',   name: 'Editing',   owner: 'Editor',  color: '#2FA66A', stages: [8, 9, 10, 11, 12, 13, 14], queue: 8 },
+  { key: 'launch', name: 'Launch',    owner: 'Growth',  color: '#B48CF2', stages: [15] }
+];
+var HOLD_COLOR = '#4A4541';
+var QUEUE_STAGE = 8; // "Waiting in queue": drawn striped inside the Editing colour wherever Editing appears
+var STAGE_PHASE = [];
+PHASES.forEach(function (ph, i) { ph.stages.forEach(function (j) { STAGE_PHASE[j] = i; }); });
+// CSS class that colours a stage by its phase (queue striped, hold grey).
+function stCls(j) { return j === HOLD ? 'ph-hold' : j === QUEUE_STAGE ? 'ph-edit ph-queue' : 'ph-' + PHASES[STAGE_PHASE[j]].key; }
 var PBL_N = 7, HOLD = 16, END = -1, GAP = -2; // GAP: time between Content Approved and the MCT handoff, not counted
 var MCT_DONE = ['Launched', 'Complete', 'Archive', 'Built - Needs Review'];
 
@@ -692,9 +710,9 @@ function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
 function legend() {
-  $('legend').innerHTML = 'Owner' + ['pa', 'cs', 'ld', 'pt', 'ed', 'gr', 'hold'].map(function (k) {
-    return '<span class="sw ' + k + '"></span>' + OWNERS[k];
-  }).join('');
+  $('legend').innerHTML = 'Phase' + PHASES.map(function (ph) {
+    return '<span class="sw ph-' + ph.key + '"></span>' + ph.name + ' (' + ph.owner + ')';
+  }).join('') + '<span class="sw ph-edit ph-queue"></span>Waiting in queue<span class="sw ph-hold"></span>On hold';
 }
 
 // Every filter except the start date (lead time filters on launch date instead).
@@ -728,7 +746,7 @@ function seg(x, j) {
   var d = x.s.days[j];
   var fl = x.s.flags.byStage[j];
   if (!d && !fl) return '';
-  return '<div class="' + STAGES[j][2] + (fl ? ' fseg' : '') + '" style="flex:' + (d || 0.6) + '"' + segAttrs(x, j) + '>' + (fl ? '<span class="fb">⚑</span>' : '') + (d > 1 ? d : '') + '</div>';
+  return '<div class="' + stCls(j) + (fl ? ' fseg' : '') + '" style="flex:' + (d || 0.6) + '"' + segAttrs(x, j) + '>' + (fl ? '<span class="fb">⚑</span>' : '') + (d > 1 ? d : '') + '</div>';
 }
 
 // Pinned row: the average days per stage across the briefs shown (default: started in the last 90 days).
@@ -751,7 +769,7 @@ function renderAvgRow() {
     if (x.avg < 0.05) return '';
     var S = STAGES[x.j];
     var t = '<b>' + S[0] + '</b> · ' + S[1] + '<div>Average ' + r1(x.avg) + ' days' + (x.j === 2 ? ' past the 1st' : '') + ' · median ' + r1(x.med) + '</div><div class="m">Across ' + x.n + ' briefs ' + rangeLabel() + ' that finished this stage</div>';
-    return '<div class="' + S[2] + '" style="flex:' + x.avg + '" data-tipx="' + esc(t) + '">' + (x.avg >= 1.5 ? r1(x.avg) : '') + '</div>';
+    return '<div class="' + stCls(x.j) + '" style="flex:' + x.avg + '" data-tipx="' + esc(t) + '">' + (x.avg >= 1.5 ? r1(x.avg) : '') + '</div>';
   }
   var bar = st.filter(function (x) { return x.j < PBL_N; }).map(seg).join('') + '<div class="hand" data-hand="1"></div>' + st.filter(function (x) { return x.j >= PBL_N; }).map(seg).join('');
   $('avgrow').innerHTML = '<div class="avgrow"><div class="srow"><span class="lbl2"><b>Average brief</b>' + VIEW.length + ' briefs ' + rangeLabel() + '</span>' +
@@ -804,9 +822,9 @@ function show(id) {
     if (j === PBL_N) h += '<div class="sec">Master Creative Tracker</div>';
     var st = STAGES[j], d = s.days[j], w = d === big && d > 0, r = s.reached[j], sf = s.flags.byStage[j];
     h += '<div class="g"' + (r ? segAttrs(x, j) : '') + '><span style="color:' + (w || sf ? 'var(--text-danger)' : r ? 'var(--text-primary)' : 'var(--text-muted)') + '">' + (sf ? '⚑ ' : '') + st[0] + (s.current === j ? '<span class="live"></span>' : '') + '</span>' +
-      '<span class="pill ' + st[2] + '" title="' + esc(st[1]) + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
+      '<span class="pill ' + stCls(j) + '" title="' + esc(st[1]) + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
       '<div style="position:relative;height:14px;background:var(--surface-1);border-radius:4px">' +
-      (r ? '<div class="' + st[2] + '" style="position:absolute;left:' + (start / t * 100) + '%;width:' + (d / t * 100) + '%;min-width:3px;height:100%;border-radius:4px;' + (w ? 'outline:1.5px solid #fff;' : '') + '"></div>' : '') +
+      (r ? '<div class="' + stCls(j) + '" style="position:absolute;left:' + (start / t * 100) + '%;width:' + (d / t * 100) + '%;min-width:3px;height:100%;border-radius:4px;' + (w ? 'outline:1.5px solid #fff;' : '') + '"></div>' : '') +
       '</div><span style="text-align:right;font-variant-numeric:tabular-nums;' + (w ? 'color:var(--text-danger);font-weight:600' : r ? '' : 'color:var(--text-muted)') + '">' + (!r ? '–' : d === 0 ? (j === 2 ? '0' : '<1') : d) + '</span></div>';
     start += d;
   }
@@ -885,8 +903,8 @@ function renderPhaseBars(id, fn, label) {
     if (s.j === 0) h += '<div class="sec">Partner Brief Library</div>';
     if (s.j === PBL_N) h += '<div class="sec">Master Creative Tracker</div>';
     var st = STAGES[s.j];
-    h += '<div class="avg" data-avg="' + s.j + '" data-lbl="' + label + '" data-n="' + s.n + '" data-v="' + r1(s.avg) + '"><span>' + st[0] + '</span><span class="pill ' + st[2] + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
-      '<div class="track"><div class="fill ' + st[2] + '" style="width:' + ((s.avg || 0) / max * 88) + '%"></div><span class="val" style="left:' + ((s.avg || 0) / max * 88) + '%">' + (s.n ? r1(s.avg) + 'd' : 'no data') + '</span></div></div>';
+    h += '<div class="avg" data-avg="' + s.j + '" data-lbl="' + label + '" data-n="' + s.n + '" data-v="' + r1(s.avg) + '"><span>' + st[0] + '</span><span class="pill ' + stCls(s.j) + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
+      '<div class="track"><div class="fill ' + stCls(s.j) + '" style="width:' + ((s.avg || 0) / max * 88) + '%"></div><span class="val" style="left:' + ((s.avg || 0) / max * 88) + '%">' + (s.n ? r1(s.avg) + 'd' : 'no data') + '</span></div></div>';
   });
   $(id).innerHTML = h;
 }
@@ -1004,7 +1022,7 @@ function renderReport() {
     if (st.j === 0) h += '<tr class="sec"><td colspan="8">Partner Brief Library</td></tr>';
     if (st.j === PBL_N) h += '<tr class="sec"><td colspan="8">Master Creative Tracker</td></tr>';
     var S0 = STAGES[st.j], ch = st.now != null && st.prev != null ? st.now - st.prev : null;
-    h += '<tr><td>' + S0[0] + '</td><td><span class="pill ' + S0[2] + '">' + S0[1] + '</span></td><td>' + (st.now != null ? r1(st.now) + 'd' : '–') +
+    h += '<tr><td>' + S0[0] + '</td><td><span class="pill ' + stCls(st.j) + '">' + S0[1] + '</span></td><td>' + (st.now != null ? r1(st.now) + 'd' : '–') +
       '</td><td>' + (st.prev != null ? r1(st.prev) + 'd' : '–') + '</td><td class="' + (ch > 0.05 ? 'up' : ch < -0.05 ? 'down' : '') + '">' +
       (ch == null ? '–' : (ch > 0 ? '▲ +' : ch < 0 ? '▼ ' : '') + r1(ch) + 'd') + '</td><td>' + st.nNow + '</td><td>' + st.cur + '</td><td>' + (st.cur ? r1(st.curAvg) + 'd' : '–') + '</td></tr>';
   });
@@ -1555,7 +1573,7 @@ function renderTrends() {
     var col = bad ? '#EF4444' : '#FF5600', lp = pts[pts.length - 1].split(',');
     var tipTxt = M.map(function (m, i) { return m.label + ': ' + (t.v[i] == null ? '–' : r1(t.v[i]) + 'd'); }).join('<br>');
     return '<div class="tile' + (bad ? ' slow' : '') + '" data-tipx="' + esc('<b>' + STAGES[t.j][0] + '</b> · ' + STAGES[t.j][1] + '<div class="m">' + tipTxt + '</div><div class="m">' + t.n + ' finished in window</div>') + '">' +
-      '<div class="n"><span>' + STAGES[t.j][0] + '</span><span class="pill ' + STAGES[t.j][2] + '">' + STAGES[t.j][1].split(' ')[0] + '</span></div>' +
+      '<div class="n"><span>' + STAGES[t.j][0] + '</span><span class="pill ' + stCls(t.j) + '">' + STAGES[t.j][1].split(' ')[0] + '</span></div>' +
       '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:6px;gap:6px"><div><span style="font-size:18px;font-weight:600">' + r1(t.last) + 'd</span> <span style="font-size:12px;color:' + (bad ? 'var(--text-danger)' : good ? 'var(--good)' : 'var(--text-muted)') + '">' + (t.thin ? 'too few' : (d > 0 ? '+' : '') + r1(d) + 'd') + '</span></div>' +
       '<svg width="90" height="30" viewBox="-3 0 106 30" aria-hidden="true"><polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="3" fill="' + col + '"/></svg></div></div>';
   }).join('') || '<div class="empty">No finished stages in this window.</div>';
