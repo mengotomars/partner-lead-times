@@ -11,7 +11,7 @@ const DATA_SOURCE_VERSION = '2025-09-03'; // the Partners Database has several d
 // Property names exactly as they appear in Notion (case- and space-sensitive).
 const PBL_PROPS = {
   name: 'Brief Name', status: 'Brief Status', month: 'Brief Month', product: 'Product',
-  tier: 'Tier', partner: 'Sent To', mct: '🚀 Master Creative Tracker',
+  tier: 'Tier', partner: 'Sent To', mct: '\u{1F680} Master Creative Tracker' /* the rocket emoji, written as a code so copy-paste can't mangle it */,
   created: 'Created Date', briefingStart: 'Briefing Start Date', briefReview: 'Brief Review Date',
   briefReady: 'Brief Ready Date', briefSent: 'Brief Sent Date', footageReceived: 'Footage Received Date',
   editsRequested: 'Edits Requested Date', revisionsStart: 'Revisions Start Date',
