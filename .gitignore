@@ -1,0 +1,5 @@
+.env
+.dev.vars
+*.key
+.notion_key
+.DS_Store
