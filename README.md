@@ -12,27 +12,41 @@ Notion page (/embed) → index.html on GitHub Pages → Cloudflare Worker → No
 
 ## Tabs
 
-Every chart has a short "What it shows / How to read it / Use it to" note under its title.
-Owner colours: Partnerships orange, CS blue, Leadership white, Partner yellow, Editor green, Growth cyan,
-On hold grey stripes. Red is only used for the ⚑ flag icon.
+Five tabs, each linkable: `#today` (default), `#briefs`, `#trends`, `#partners`, `#report`. Every section has
+a title, a one-line subtitle and an ⓘ with the full "what it shows / how to read it" note. A red outline on a
+segment or card means it broke a deadline.
 
-The page has five tabs (the URL remembers the last one, e.g. `…/#trends`):
+- **Today**: lead time for the last 30 days against the 28-day target, briefs past a deadline right now, and
+  partners at $0 spend. **Who to chase** groups every overdue brief into Creative strategists, Editors,
+  Growth and Partners (longest overdue first, each linking to Notion). **$0 spend this week** is the spend
+  check as a table, with **Copy for #partnerships** (the Slack message format).
+- **Briefs**: filters (search, start date, month, product, Late only). **The typical brief** shows the average
+  days per phase (queue time striped inside Editing) with the median per phase and the four longest steps.
+  **Every brief** lists each brief with its phase bar (or all 17 steps), where it is now, its longest step and
+  its total. Click a row for a plain-English breakdown with one card per phase.
+- **Trends** (3 / 6 / 12 months): lead time by launch month split into Brief Library vs production, a tile
+  with a sparkline for every one of the 17 steps grouped by phase, open sprints per person against
+  `WIP_LIMIT`, and assets launched per month.
+- **Partners**: footage on time vs late by brief month, a heatmap of every active partner (except
+  Commander Crew and `EXCLUDED_PARTNERS`) by month, and **Data to fix** for briefs that can't be checked.
+  Late = footage received more than `FILMING_LIMIT` days after Brief Sent, or still Sent To Partner / Edits
+  Requested after that. Footage Due Date is not used.
+- **Weekly report**: pick a week. Leadership summary (Headline, Where the time went, Missed deadlines, Focus
+  for next week) with **Copy summary**, the four deadline cards with their brief lists, phase pacing (last 4
+  weeks vs the 4 before), and the weekly status overview with **Copy overview**.
 
-- **Timeline**: the stacked bar per brief, the stage breakdown, the status overview, and average and median days per phase. The average chart starts with an "Average brief" stacked bar: every stage's average added into one typical brief for the chosen start-date period (last 90 days by default). The filters here only affect this tab.
-- **Trends** (window: last 3 / 6 / 12 months, by launch month): average lead time split into PBL and MCT days
-  against a target line, the change over the window, stages getting slower, and a sparkline tile per stage.
-  Months with fewer than 5 launches (3 for a stage tile) are faded and aren't used for comparisons.
-- **Deadlines & capacity**: on-time rate by brief month (briefs with no ⚑), footage days late vs Footage Due
-  Date by partner, open sprints per person against a WIP limit (CS from the `CS` people fields, editors from
-  the MCT `Designer` field), and assets launched per month (`Total Assets`).
-- **Weekly report**: see below.
-- **Spend check**: see below.
+## Phases
 
-All settings are in the Settings block at the top of the script in `index.html`, including `LEAD_TIME_METRIC`, `LEAD_TIME_TODAY_DAYS`, `ROSTER_ONLY_DEFAULT`, `PARTNER_ALIASES`, `EXCLUDED_PARTNERS`, `FOOTAGE_REVIEW_BUSINESS_DAYS` (true: the 2-day footage-review limit counts business days), `TARGET_LEAD_DAYS` (28), `WIP_LIMIT` (5), `STALLED_DAYS`
-(60: open briefs stuck this long in one stage are left out of workload and partner lateness),
-`MIN_MONTH_SAMPLE`, `MIN_TILE_SAMPLE`, plus the flag limits.
+The 17 stages are grouped into five phases (the `PHASES` config in `index.html`):
 
-The charts use Chart.js from cdnjs; everything else is plain HTML.
+| Phase | Owner | Stages | Colour |
+|---|---|---|---|
+| Brief | CS | Briefing, Brief review, Late send to partner | blue |
+| Filming | Partner | Filming, Footage revisions | yellow |
+| CS review | CS | Footage review, Revision review, Edit brief | pink |
+| Editing | Editor | Waiting in queue (striped), V1 production, V1 review, Revisions, Final review, Exec review, Resize + upload | green |
+| Launch | Growth | Growth QA to launch | purple |
+| On hold | | not counted as production time | grey |
 
 ## Lead time (one definition everywhere)
 
@@ -92,10 +106,10 @@ A brief is linked to its MCT item through the PBL `🚀 Master Creative Tracker`
 test briefs are excluded, so are Commander Crew partners (outliers; `EXCLUDED_TIERS` in `index.html`), and so are template rows (names containing `XXX` or `Partner Name`).
 To change any of this, edit `STAGES` / `computeStages` in `index.html` or the property lists in `worker.js`.
 
-## Spend check tab (read-only)
+## Spend check (Today tab, read-only)
 
-Builds the Partner Spend Check message for Slack and gives you a **Copy message** button. It never posts or
-edits anything.
+The "$0 spend this week" table on Today builds the Partner Spend Check message for Slack and gives you a
+**Copy for #partnerships** button. It never posts or edits anything.
 
 - Reads **Active** partners from the Partners Database. A partner has $0 spend if Spend L7 is 0 or blank.
 - If the newest **Last Updated** is more than 2 days old, nobody is flagged and the message is the one-line
@@ -123,19 +137,19 @@ edits anything.
 
 A written overview of everything in progress, rebuilt every Wednesday from the same snapshot as the weekly
 report: where things stand (and who the work is waiting on), the slowest bottlenecks, the biggest problems
-ranked against the usual weekly level, and suggestions for each. **Needs your attention now** is checked live
-against today: open briefs whose current stage broke a limit, or that have been in production more than twice
-the MCT limit. Click one to jump to it in the timeline. Workload suggestions also use today's numbers.
-**Copy overview** copies it all as plain-text bullets. Each brief's breakdown also has a one-line plain-English
-note (where it is, whose court, slowest step, what it missed).
+ranked against the usual weekly level, and suggestions for each. Workload suggestions use today's numbers.
+**Copy overview** copies it as plain-text bullets. The live list of overdue briefs is **Who to chase** on the
+Today tab: open briefs whose current step broke a limit, or that have been in production more than twice the
+MCT limit, grouped by who to chase. Each brief's breakdown on the Briefs tab has a one-line plain-English note
+(where it is, whose court, slowest step, what it missed).
 
-## Weekly report (below the charts)
+## Weekly report (Weekly report tab)
 
 A new report appears every Wednesday. The report dated Wednesday D covers the 7 days before it (Wed to Tue)
 and is rebuilt from the Notion dates as they stood at the end of that Tuesday, so past weeks stay put. Pick
-older weeks from the dropdown. At the top is a **written summary for leadership**: short bullets (headline,
-deadlines, where the time is going, focus for next week) generated from the cards. **Copy summary** puts it
-on the clipboard as plain text with • bullets, ready for Slack or email. Examples in the summary skip briefs
+older weeks from the week picker. At the top is the **leadership summary**: four blocks (Headline, Where the
+time went, Missed deadlines, Focus for next week), two short sentences each in phase language, generated from
+the cards. **Copy summary** puts it on the clipboard as plain text with • bullets, ready for Slack or email. Examples in the summary skip briefs
 stalled more than `STALLED_DAYS`. It always covers every
 partner brief and ignores the dashboard filters.
 
@@ -143,12 +157,12 @@ partner brief and ignores the dashboard filters.
 |---|---|---|
 | Briefs ready past due date (CS) | Briefs whose Brief Ready Date fell in the week and was after Brief Due Date | Not ready and past due |
 | Late partner footage (Partner) | Footage received in the week more than 10 days after Brief Sent Date | Sent, no footage, over 10 days |
-| Footage review over 2 days (CS) | Footage reviews that finished in the week and took more than 2 days | In review over 2 days |
+| Footage review over 2 days (CS) | Footage reviews that finished in the week and took more than 2 business days | In review over 2 business days |
 | Stuck in MCT over 7 days | Items launched in the week that spent more than 7 days in the MCT | In the MCT over 7 days, holds excluded |
 
-Each card also shows the average days over the limit and the 8-week average per week, and lists the briefs.
-The step table shows the average days per stage for stages finished in the last 4 weeks, compared with the 4
-weeks before, plus how many briefs are sitting in each stage and for how long. The limits are `FILMING_LIMIT`,
+Each card shows "X of Y missed", the 8-week average ("usually"), how many are still open, and a "Show the Y
+briefs" list. **How each phase is pacing** compares the last 4 weeks with the 4 before per phase, only using
+steps that have values in both periods, plus how many briefs are in each phase now. The limits are `FILMING_LIMIT`,
 `FOOTAGE_REVIEW_LIMIT` and `MCT_STUCK_LIMIT` in `index.html`.
 
 ## Deploy

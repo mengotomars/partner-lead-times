@@ -4,381 +4,383 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partner Lead Times</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <style>
 :root{
-  --bg:#0D0D0D;--card:#242424;--card-2:#1A1A1A;--surface-1:#1A1A1A;--surface-2:#2C2C2C;
-  --border:#333333;--border-strong:rgba(255,86,0,.6);
-  --text-primary:#F5E8D7;--text-secondary:#B3A897;--text-muted:#888888;
-  --text-danger:#FF4D3D;--accent:#FF5600;--good:#22C55E;--warn:#EAB308;--radius:6px;
-  --series-pbl:#FF5600;--series-mct:#E9D5B7;
+  color-scheme:dark;
+  --bg:#121110; --card:#1C1A18; --card-2:#242120; --line:#2E2A27;
+  --text:#F3EEE8; --muted:#A8A098; --faint:#7F776F;
+  --accent:#FF6A13; --green:#5FD39A; --red-sq:#C8453B; --red:#FF7B6B; --yellow:#F2C94C; --breach:#FF5A4A;
+  --f-head:"Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+  --f-body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius:14px;
 }
 *{box-sizing:border-box}
-html{background:var(--bg)}
-body{margin:0;min-height:100vh;color:var(--text-primary);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;
-  background:radial-gradient(1200px 600px at 80% -10%,rgba(255,86,0,.06),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(150,56,33,.10),transparent 55%),var(--bg)}
-.wrap{max-width:1280px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:24px}
-button,select,input{font:inherit;color:var(--text-primary);background:var(--card-2);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-size:13px}
-select:focus,input:focus{outline:none;border-color:var(--accent)}
-button{cursor:pointer}
-input::placeholder{color:var(--text-muted)}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1440px;margin:0 auto;padding:40px 88px 72px}
+button,select,input{font:inherit;color:var(--text)}
 a{color:var(--accent)}
 [hidden]{display:none!important}
-
-/* Owner colours: one distinct hue per team, checked so neighbouring stages stay apart for colour-blind viewers too.
-   Red is kept for the ⚑ flag only. */
-.pa{background:#FF7A00;color:#140700}.cs{background:#3B82F6;color:#050F24}.ld{background:#F5F5F5;color:#111}
-.pt{background:#FACC15;color:#1F1600}.ed{background:#22C55E;color:#03170A}.gr{background:#22D3EE;color:#03191D}
-.hold{background:repeating-linear-gradient(45deg,#5A5A5A 0 4px,#2A2A2A 4px 8px);color:#eee}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
 /* Phase colours (text on colour is always dark) */
 .ph-brief{background:#5B8DEF;color:#0F0D0B}.ph-film{background:#F2C94C;color:#0F0D0B}.ph-review{background:#F0A6C8;color:#0F0D0B}
 .ph-edit{background:#2FA66A;color:#0F0D0B}.ph-launch{background:#B48CF2;color:#0F0D0B}.ph-hold{background:#4A4541;color:#F3EEE8}
 .ph-queue{background:repeating-linear-gradient(135deg,#2FA66A 0 5px,#1F7A4C 5px 10px)}
-/* From the reference mockup */
-.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px;vertical-align:-1px}
-.srow{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;border:0.5px solid transparent}
-.srow:hover{background:var(--surface-1)}.srow.on{border-color:var(--border-strong);background:var(--surface-1)}
-.sbar{display:flex;height:26px;border-radius:4px;overflow:hidden;gap:1px}
-.sbar div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;min-width:0;overflow:hidden}
-.hand{width:2px;background:var(--text-primary)!important;margin:0 2px;flex:none!important}
-.g{display:grid;grid-template-columns:150px 100px minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:13px;margin:5px 0}
-.pill{font-size:11px;padding:2px 6px;border-radius:var(--radius);text-align:center;white-space:nowrap}
-.sec{font-size:12px;color:var(--text-secondary);margin:14px 0 4px;padding-bottom:4px;border-bottom:0.5px solid var(--border)}
+.breach{box-shadow:inset 0 0 0 2px var(--breach)}
 
-/* Page chrome (matches the Partner Performance site) */
-.hero{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;
-  background:linear-gradient(135deg,rgba(150,56,33,.30),var(--card) 50%,var(--card-2))}
-.eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
-h1{margin:8px 0 0;font-size:30px;font-weight:700;letter-spacing:-.025em}
-.sub{margin:4px 0 0;font-size:12px;color:var(--text-muted)}
-.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.roster{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer}
-.roster input{accent-color:var(--accent);width:14px;height:14px;padding:0}
-.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;padding:1px 6px;border-radius:999px;border:1px solid var(--border);color:var(--text-muted);margin-left:6px;vertical-align:1px;white-space:nowrap}
-.btn-accent{border-radius:999px;border:1px solid rgba(255,86,0,.4);background:rgba(255,86,0,.10);color:var(--accent);font-size:12px;font-weight:600;padding:6px 16px}
-.btn-accent:hover{background:rgba(255,86,0,.2)}
-.tabs,.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--border);border-radius:999px;background:var(--card-2)}
-.tabs button,.seg button{border:0;background:transparent;border-radius:999px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--text-muted)}
-.tabs button:hover,.seg button:hover{color:var(--text-primary)}
-.tabs button.on,.seg button.on{background:var(--accent);color:#fff}
-.seg button{padding:4px 14px}
-.tabpanel{display:flex;flex-direction:column;gap:20px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
-.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px;border-radius:12px}
-.controls input{min-width:200px;flex:1 1 200px}
-.chead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
-.ctitle{font-size:14px;font-weight:600;margin:0 0 2px}
-.pnote{font-size:12px;color:var(--text-muted)}
-.sublbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin:8px 0 4px}
-.why{margin:8px 0 0;font-size:12px;line-height:1.55;color:var(--text-secondary);background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 12px}
-.why b{color:var(--text-primary);font-weight:600}
-.foot{font-size:12px;color:var(--text-muted);margin:0;line-height:1.6}
-.windowbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.lbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted)}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.kpis-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.kpi{border:1px solid var(--border);border-radius:16px;padding:20px;background:linear-gradient(135deg,var(--card),var(--card-2));box-shadow:inset 0 0 0 1px rgba(255,86,0,.2)}
-.kpi.good{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.4);box-shadow:none}
-.kpi.bad{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.4);box-shadow:none}
-.kpi .l{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
-.kpi .v{font-size:30px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;line-height:1.15}
-.kpi .v small{font-size:12px;color:var(--text-muted);font-weight:400;margin-left:4px}
-.kpi .pnote{margin-top:4px}
-.chartbox{position:relative;width:100%;margin-top:12px}
-.legend-inline{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary)}
-.legend-inline span{display:inline-flex;align-items:center;gap:5px}
-.legend-inline i{display:inline-block;width:10px;height:10px;border-radius:2px}
-.legend-inline i.dash{width:14px;height:0;border-top:2px dashed var(--text-muted);border-radius:0}
-.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:12px}
-.tile{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--card-2)}
-.tile.slow{border-color:rgba(239,68,68,.55)}
-.tile .n{font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;gap:6px}
-.tile .n .pill{font-size:10px;padding:1px 5px}
-.hb{display:grid;grid-template-columns:130px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13px;margin:7px 0}
-.hb .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb .tr{height:14px;background:var(--card-2);border-radius:4px;position:relative}
-.hb .fl{position:absolute;left:0;top:0;height:100%;border-radius:0 4px 4px 0}
-.hb .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.hb .lim{position:absolute;top:-3px;bottom:-3px;border-left:1.5px dashed var(--text-muted)}
-#rows{max-height:62vh;overflow-y:auto;padding-right:4px}
-#rows::-webkit-scrollbar{width:8px}#rows::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:4px}
-.flag{color:var(--text-danger);margin-right:5px;font-size:12px}
-.sbar div.fseg{min-width:18px;gap:3px}
-.fb{display:inline-flex;align-items:center;justify-content:center;background:#0D0D0D;color:#FF3B2A;border-radius:3px;font-size:10px;line-height:1;padding:2px 3px}
-.chk{font-size:12px;color:var(--text-secondary);margin:6px 0 2px;display:flex;gap:18px;flex-wrap:wrap}
-.chk b{color:var(--text-primary);font-weight:600}.chk .bad{color:var(--text-danger);font-weight:600}.chk .ok{color:var(--text-muted)}
-.live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:4px;vertical-align:1px;animation:pulse 1.6s infinite}
-@keyframes pulse{50%{opacity:.25}}
-.empty,.loading,.error{padding:40px 0;text-align:center;color:var(--text-secondary);font-size:13px}
-.error{color:var(--text-danger)}
-.meta{font-size:12px;color:var(--text-secondary);margin:6px 0 2px;display:flex;gap:14px;flex-wrap:wrap}
-.meta a{text-decoration:none}
+/* Header and tabs */
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.eyebrow{margin:0;font:600 11px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{margin:10px 0 6px;font:700 clamp(30px,4vw,44px)/1.05 var(--f-head);letter-spacing:-.02em}
+.sub{margin:0;color:var(--muted);font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:600;font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#140700}
+.btn-primary:hover{filter:brightness(1.08);border-color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.tabbar{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-top:28px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:12px 16px;margin-bottom:-1px;color:var(--muted);font-weight:500;font-size:14px;cursor:pointer}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected="true"]{color:var(--text);font-weight:600;border-bottom-color:var(--accent)}
+.tabctl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:6px 0}
+.check{display:inline-flex;align-items:center;gap:8px;color:var(--text);font-size:13px;cursor:pointer}
+.check input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.seg{display:inline-flex;gap:2px;background:var(--card);border-radius:999px;padding:3px}
+.seg button{background:none;border:0;border-radius:999px;padding:6px 14px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--card-2);color:var(--text)}
+select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px}
+.note{color:var(--muted);font-size:12px;margin:10px 0 0}
 
-/* Average-days chart */
-.avg{display:grid;grid-template-columns:170px 100px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;margin:6px 0}
-.avg .track{position:relative;height:18px}
-.avg .fill{height:100%;border-radius:0 4px 4px 0;min-width:2px}
-.avg .val{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text-primary);font-variant-numeric:tabular-nums;padding-left:6px;white-space:nowrap}
+/* Sections and cards */
+.panel{display:flex;flex-direction:column;gap:48px;margin-top:36px}
+section > .sh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:14px}
+h2{margin:0;font:700 24px/1.2 var(--f-head);letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+h2 + .sub, .sh .sub{margin-top:4px}
+h3{margin:0;font:600 15px/1.3 var(--f-body)}
+.info{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--card-2);border:0;color:var(--muted);font-size:12px;font-weight:700;cursor:help;padding:0}
+.info:hover,.info:focus-visible{color:var(--text)}
+.card{background:var(--card);border-radius:var(--radius);padding:24px}
+.inner{background:var(--card-2);border-radius:12px;padding:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.big{background:var(--card);border-radius:var(--radius);padding:22px 24px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.big .l{color:var(--muted);font-size:13px}
+.big .v{font:700 44px/1.05 var(--f-head);letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.big .v small{font:500 15px/1 var(--f-body);color:var(--muted);letter-spacing:0}
+.big .s{font-size:13px;color:var(--muted)}
+.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--yellow)}
+.meter{position:relative;height:6px;background:var(--card-2);border-radius:999px;margin:8px 0 4px}
+.meter .f{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--accent)}
+.meter .t{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--text);border-radius:1px}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+.loading{color:var(--muted);padding:40px 0;text-align:center}
+.error{color:var(--red);padding:24px 0}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:12px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;padding:1px 7px;border-radius:999px;background:var(--card-2);color:var(--muted);margin-left:6px;vertical-align:1px;white-space:nowrap}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 
-.rcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
-.rc{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
-.rc .l{font-size:12px;font-weight:600}.rc .who{font-size:11px;color:var(--text-muted)}
-.rc .v{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}.rc .v small{font-size:12px;color:var(--text-secondary);font-weight:400;margin-left:6px}
-.rc .row{font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;gap:8px}.rc .row b{color:var(--text-primary);font-weight:600;font-variant-numeric:tabular-nums}
-.rc details{font-size:12px;color:var(--text-secondary);border-top:0.5px solid var(--border);padding-top:6px}
-.rc summary{cursor:pointer;color:var(--accent)}.rc li{margin:3px 0}.rc ul{padding-left:16px;margin:6px 0 0;max-height:180px;overflow:auto}
-.summary{margin-top:10px;font-size:14px;line-height:1.6}
-.summary h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
-.summary h4:first-child{margin-top:0}
-.summary ul{margin:0;padding-left:20px}.summary li{margin:3px 0}
-.summary b{font-weight:600}
-.ovgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:10px}
-.ovbox{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55}
-.ovbox h4{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.ovbox.now{border-color:rgba(239,68,68,.5);grid-column:1/-1}
-.ovbox.now h4{color:var(--text-danger)}
-.ovbox ul{margin:0;padding-left:18px}.ovbox li{margin:3px 0}
-.ovbox b{font-weight:600}
-.act{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) minmax(0,2fr);gap:10px;padding:6px 0;border-top:1px solid rgba(255,255,255,.06);cursor:pointer;align-items:center}
-.act:first-of-type{border-top:0}.act:hover .an{color:var(--accent)}
-.act .an{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.act .aw{font-size:12px;color:var(--text-secondary)}
-.act .ad{font-size:12px}
-.avgrow{margin:12px 0 6px;padding:10px 8px;border:1px solid rgba(255,86,0,.35);border-radius:10px;background:rgba(255,86,0,.05)}
-.avgrow .srow{padding:0;cursor:default}.avgrow .srow:hover{background:none}
-.avgrow .lbl2{width:170px;font-size:12px;line-height:1.3}.avgrow .lbl2 b{display:block;font-size:13px}
-.avgrow .pnote{margin-top:6px}
-.bnote{font-size:13px;line-height:1.55;margin:8px 0 2px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--card-2);border-radius:0 8px 8px 0}
-.more{margin-top:6px;font-size:12px;background:none;border:0;color:var(--accent);padding:0}
-.slack{white-space:pre-wrap;word-break:break-word;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0 0;color:var(--text-primary)}
-.sp{border-top:1px solid rgba(255,255,255,.06);padding:10px 0;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr);gap:4px 16px;font-size:13px}
-.sp:first-child{border-top:0}
-.sp .nm{font-weight:600}.sp .tier{font-size:11px;color:var(--text-muted);margin-left:6px}
-.sp .sub{font-size:12px;color:var(--text-secondary)}
-.sp .why2 b{font-weight:600}
-.sphead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 2px}
-.rt{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;min-width:560px}
-.rt th{font-size:11px;font-weight:500;color:var(--text-secondary);text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--border);white-space:nowrap}
-.rt th:first-child,.rt th:nth-child(2){text-align:left}
-.rt td{padding:5px 8px;border-bottom:0.5px solid rgba(255,255,255,.05);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.rt td:first-child,.rt td:nth-child(2){text-align:left}
-.rt tr.sec td{color:var(--text-secondary);font-size:12px;padding-top:12px;text-align:left}
-.up{color:var(--text-danger)}.down{color:#22D3EE}
-#tip{position:fixed;pointer-events:none;z-index:10;background:#1A1A1A;border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:8px 10px;font-size:12px;line-height:1.5;max-width:280px;box-shadow:0 6px 24px rgba(0,0,0,.6);display:none}
-#tip b{font-weight:600}#tip .m{color:var(--text-secondary)}
+/* Stacked bars */
+.bar{display:flex;height:26px;border-radius:6px;overflow:hidden;gap:2px;min-width:0;max-width:100%}
+.bar > div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;min-width:0;overflow:hidden;white-space:nowrap}
+.bar > div.breach{box-shadow:inset 0 0 0 2px var(--breach)}
+.bar.tall{height:40px;border-radius:8px}.bar.tall > div{font-size:13px}
 
-@media (max-width:720px){
-  .wrap{padding:16px;gap:16px}
-  h1{font-size:24px}
-  .kpis,.kpis-3{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .tabs{flex-wrap:wrap;border-radius:14px}
-  .card{padding:14px}
-  .hb{grid-template-columns:100px minmax(0,1fr) 56px}
-  .srow>span:first-child{width:110px!important}
-  .g{grid-template-columns:110px 70px minmax(0,1fr) 30px}
-  .avg{grid-template-columns:120px 70px minmax(0,1fr)}
-  .rcards{grid-template-columns:minmax(0,1fr)}
-  .act{grid-template-columns:minmax(0,1fr)}
-  .sp{grid-template-columns:minmax(0,1fr)}
-  #libhead{padding-left:120px!important}
-  #libhead span:nth-child(2){display:none}
+/* Today: who to chase */
+.cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
+.col{background:var(--card);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.colh{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px}
+.colh .n{color:var(--muted);font-weight:500;font-size:13px}
+.chase{display:block;background:var(--card-2);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--text)}
+.chase:hover{outline:1px solid var(--line)}
+.chase b{display:block;font-weight:600}
+.chase .m{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.chase .d{display:block;font-weight:600;font-size:13px;margin-top:4px}
+table{border-collapse:collapse;width:100%}
+th{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px}
+td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.tablewrap{overflow-x:auto}
+
+/* Briefs */
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.filters input[type=search]{flex:1 1 260px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:13px}
+.toggle{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.toggle[aria-pressed="true"]{border-color:var(--breach);color:var(--red)}
+.plegend{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px}
+.plegend div{font-size:12px;color:var(--muted);min-width:0}
+.plegend b{display:flex;align-items:center;gap:6px;color:var(--text);font-size:14px;font-weight:600}
+.steps4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stepc{background:var(--card-2);border-radius:12px;padding:14px 16px}
+.stepc.q{outline:1.5px dashed #2FA66A;outline-offset:-1.5px}
+.stepc .k{font-size:12px;color:var(--muted)}
+.stepc .t{font-weight:600;margin-top:2px}
+.stepc .v{font:700 26px/1.1 var(--f-head);margin-top:6px}
+.brtable{max-height:70vh;overflow:auto}
+.brtable table{min-width:900px}
+.brtable th{position:sticky;top:0;background:var(--card);z-index:1}
+.brtable tr.row{cursor:pointer}
+.brtable tr.row:hover td{background:rgba(255,255,255,.02)}
+.brtable tr.row.on td{background:rgba(255,106,19,.06)}
+.brtable tr.row.on td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.bname{font-weight:600;min-width:180px}
+.bname .m{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.pcards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}
+.pcard{background:var(--card-2);border-radius:12px;padding:14px 16px;min-width:0}
+.pcard.breach{box-shadow:inset 0 0 0 2px var(--breach)}
+.pcard .h{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.pcard .v{font:700 28px/1.1 var(--f-head);margin:6px 0 4px}
+.pcard .t{font-size:12px;color:var(--muted)}
+.steplist{margin-top:16px}
+.srow{display:grid;grid-template-columns:200px 150px minmax(0,1fr) 60px;gap:12px;align-items:center;padding:6px 0;font-size:13px}
+.srow .track{position:relative;height:12px;background:var(--card-2);border-radius:4px}
+.srow .track > div{position:absolute;top:0;bottom:0;border-radius:4px;min-width:3px}
+.sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+
+/* Trends */
+.prow{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;margin-top:16px}
+.pcardL{background:var(--card);border-radius:12px;padding:16px;border-top:3px solid var(--c)}
+.pcardL .v{font:700 28px/1.1 var(--f-head);margin-top:6px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tile{background:var(--card);border-radius:12px;padding:12px 14px;min-width:0}
+.tile.slow{box-shadow:inset 0 0 0 2px var(--breach)}
+.tile .h{display:flex;justify-content:space-between;gap:6px;font-size:12px;font-weight:600}
+.tile .h span:last-child{color:var(--muted);font-weight:500}
+.tile .b{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-top:6px}
+.tile .v{font:700 20px/1.1 var(--f-head)}
+.tile .c{font-size:12px}
+.chartbox{position:relative;width:100%}
+.hb{display:grid;grid-template-columns:170px minmax(0,1fr) 40px;gap:12px;align-items:center;font-size:13px;margin:8px 0}
+.hb .tr{position:relative;height:12px;background:var(--card-2);border-radius:6px}
+.hb .fl{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.hb .lim{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);opacity:.7}
+.hb .v{text-align:right;font-variant-numeric:tabular-nums}
+
+/* Partners */
+.cbars{display:flex;align-items:flex-end;gap:24px;height:300px;padding:40px 20px 0}
+.cbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.cbar .lab{text-align:center;margin-bottom:8px}
+.cbar .lab b{display:block;font:700 22px/1.1 var(--f-head)}
+.cbar .lab span{font-size:12px;color:var(--muted)}
+.cbar .stack{width:min(80px,100%);display:flex;flex-direction:column;gap:2px;border-radius:6px 6px 0 0;overflow:hidden}
+.cbar .m{margin-top:10px;color:var(--muted);font-size:12px}
+.heat{min-width:760px;table-layout:fixed}
+.heat col.pm{width:auto}.heat col.pn{width:220px}.heat col.pt{width:110px}
+.heat td,.heat th{padding:5px 6px;border:0}
+.heat th{text-align:center}
+.heat th:first-child,.heat td:first-child{text-align:left;padding-left:0}
+.heat td.nm{font-weight:500;padding-right:16px;overflow-wrap:anywhere}
+.cell{height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#0F0D0B}
+.cell.ok{background:var(--green)}.cell.late{background:var(--red-sq)}.cell.mix{background:var(--yellow)}
+.cell.none{background:var(--card-2)}
+.cell.cant{background:repeating-linear-gradient(135deg,#2E2A27 0 4px,#1C1A18 4px 8px)}
+.heat td.tot{text-align:right;font-weight:600;white-space:nowrap;padding-left:16px}
+.fixlist{margin-top:14px;display:grid;gap:6px}
+.fixlist a{color:var(--text);text-decoration:none}
+.fixlist a:hover{color:var(--accent)}
+.fixlist .r{display:flex;justify-content:space-between;gap:12px;background:var(--card-2);border-radius:8px;padding:8px 12px;font-size:13px;flex-wrap:wrap}
+
+/* Weekly report */
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 40px;margin-top:18px}
+.summary h4{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.summary p{margin:0 0 8px;font-size:15px;line-height:1.55}
+.dcard{background:var(--card);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.dcard .v{font:700 36px/1.1 var(--f-head);margin-top:8px}
+.dcard .v small{font:500 14px/1 var(--f-body);color:var(--muted);margin-left:6px}
+.dcard .t{font-size:12px;color:var(--muted)}
+.dlist{margin-top:8px;max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px}
+.dlist a{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--text);text-decoration:none;background:var(--card-2);border-radius:6px;padding:6px 8px}
+.dlist a span:first-child{min-width:0;overflow-wrap:anywhere}
+.dlist a.miss span:last-child{color:var(--red);white-space:nowrap}
+.dlist a:not(.miss) span:last-child{color:var(--muted);white-space:nowrap}
+.ovgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ovgrid h4{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.ovgrid ul{margin:0;padding-left:18px}.ovgrid li{margin:4px 0}
+
+#tip{position:fixed;pointer-events:none;z-index:20;background:#2A2623;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;max-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:none;color:var(--text)}
+#tip .m{color:var(--muted)}
+
+@media (max-width:1100px){
+  .wrap{padding:32px 32px 64px}
+  .cols,.grid4,.steps4,.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pcards,.plegend{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+@media (max-width:720px){
+  .wrap{padding:24px 16px 56px}
+  .grid3,.grid2,.cols,.grid4,.steps4,.tiles,.summary,.ovgrid{grid-template-columns:minmax(0,1fr)}
+  .pcards,.plegend{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prow{grid-template-columns:minmax(0,1fr)}
+  .card{padding:18px}
+  .big .v{font-size:36px}
+  .srow{grid-template-columns:130px 90px minmax(0,1fr) 44px}
+  .hb{grid-template-columns:120px minmax(0,1fr) 34px}
+  .cbars{gap:10px;padding:40px 4px 0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="hero">
+  <header>
     <div>
       <p class="eyebrow">Mars Men · Partnerships</p>
       <h1>Partner Lead Times</h1>
       <p class="sub" id="updated">Loading live data from Notion…</p>
-      <p class="sub" id="rosternote" hidden></p>
-      <p class="sub">Source: Partner Brief Library → Master Creative Tracker · calendar days between milestone dates</p>
+      <p class="note" id="rosternote" hidden></p>
     </div>
-    <div class="hero-actions">
-      <label class="roster"><input type="checkbox" id="rosteronly"> Current roster only</label>
-      <button id="refresh" class="btn-accent" type="button">Refresh</button>
-      <nav class="tabs" id="tabs" role="tablist">
-        <button type="button" role="tab" data-tab="timeline">Timeline</button>
-        <button type="button" role="tab" data-tab="trends">Trends</button>
-        <button type="button" role="tab" data-tab="deadlines">Deadlines &amp; capacity</button>
-        <button type="button" role="tab" data-tab="report">Weekly report</button>
-        <button type="button" role="tab" data-tab="spend">Spend check</button>
-      </nav>
-    </div>
+    <button type="button" class="btn" id="refresh" aria-label="Refresh data from Notion">↻ Refresh</button>
   </header>
 
-  <!-- ============ Timeline ============ -->
-  <section class="tabpanel" id="tab-timeline" role="tabpanel">
-    <div class="card controls">
-      <input id="q" type="search" placeholder="Search briefs or partners">
-      <select id="range">
-        <option value="30">Started last 30 days</option>
-        <option value="90" selected>Started last 90 days</option>
-        <option value="180">Started last 6 months</option>
+  <div class="tabbar">
+    <nav class="tabs" role="tablist" aria-label="Portal sections" id="tabs">
+      <button type="button" role="tab" id="tab-btn-today" aria-controls="tab-today" data-tab="today">Today</button>
+      <button type="button" role="tab" id="tab-btn-briefs" aria-controls="tab-briefs" data-tab="briefs">Briefs</button>
+      <button type="button" role="tab" id="tab-btn-trends" aria-controls="tab-trends" data-tab="trends">Trends</button>
+      <button type="button" role="tab" id="tab-btn-partners" aria-controls="tab-partners" data-tab="partners">Partners</button>
+      <button type="button" role="tab" id="tab-btn-report" aria-controls="tab-report" data-tab="report">Weekly report</button>
+    </nav>
+    <div class="tabctl">
+      <div class="seg" id="windowctl" role="group" aria-label="Time window" hidden>
+        <button type="button" data-n="3">3 months</button><button type="button" data-n="6">6 months</button><button type="button" data-n="12">12 months</button>
+      </div>
+      <label id="weekctl" hidden><span class="sub" style="margin-right:6px">Week</span><select id="week" aria-label="Report week"></select></label>
+      <label class="check"><input type="checkbox" id="rosteronly"> Current roster only</label>
+    </div>
+  </div>
+
+  <!-- TODAY -->
+  <main>
+  <section class="panel" id="tab-today" role="tabpanel" aria-labelledby="tab-btn-today">
+    <div class="grid3" id="t-big"><div class="loading">Loading…</div></div>
+    <section>
+      <div class="sh">
+        <div><h2>Who to chase <span id="chase-info"></span></h2><p class="sub">Longest overdue first. Click a brief to open it in Notion.</p></div>
+        <button type="button" class="linkbtn" id="chase-all">Show all</button>
+      </div>
+      <div class="cols" id="chase"></div>
+      <p class="note" id="chase-note" hidden></p>
+    </section>
+    <section>
+      <div class="sh">
+        <div><h2>$0 spend this week <span id="spend-info"></span></h2><p class="sub" id="spend-sub">Active partners with no spend in the last 7 days, and why.</p></div>
+        <button type="button" class="btn btn-primary" id="copyspend">Copy for #partnerships</button>
+      </div>
+      <div class="card"><div class="tablewrap" id="spendtable"></div></div>
+    </section>
+  </section>
+
+  <!-- BRIEFS -->
+  <section class="panel" id="tab-briefs" role="tabpanel" aria-labelledby="tab-btn-briefs" hidden>
+    <div class="filters">
+      <input type="search" id="q" placeholder="Search briefs or partners" aria-label="Search briefs or partners">
+      <select id="range" aria-label="Start date">
+        <option value="30">Last 30 days</option>
+        <option value="90" selected>Last 90 days</option>
+        <option value="180">Last 6 months</option>
         <option value="">Any start date</option>
       </select>
-      <select id="month"><option value="">All months</option></select>
-      <select id="product"><option value="">All products</option></select>
-      <select id="phase">
-        <option value="">All phases</option>
-        <option value="pbl">In Partner Brief Library</option>
-        <option value="mct">In Master Creative Tracker</option>
-        <option value="done">Launched</option>
-        <option value="hold">On hold</option>
-        <option value="flag">⚑ Flagged late</option>
-      </select>
-      <select id="sort">
-        <option value="new">Newest first</option>
-        <option value="long">Longest first</option>
-        <option value="name">Name A–Z</option>
-      </select>
+      <select id="month" aria-label="Brief month"><option value="">All months</option></select>
+      <select id="product" aria-label="Product"><option value="">All products</option></select>
+      <button type="button" class="toggle" id="lateonly" aria-pressed="false">Late only</button>
     </div>
-
-    <div class="kpis" id="kpis"></div>
-
-    <div class="card">
-      <div class="ctitle">Days in each stage, per brief</div>
-<p class="why"><b>What it shows:</b> every partner brief as one bar, from Briefing Start to launch. <b>How to read it:</b> each colour is the team that owned that stage, and its length is the number of days it sat there. Left of the white line is the Brief Library; right of it is the Master Creative Tracker. An orange Partnerships bar only appears when a brief was ready before the 1st of its month but went out after it, and it shows just the days late. A ⚑ marks the stage that broke a deadline. Hover any segment for dates; click a row for its breakdown below. <b>Use it to:</b> spot which briefs are stuck and whose court they're in.</p>
-      <div style="font-size:12px;color:var(--text-secondary);padding-top:1rem;line-height:2" id="legend"></div>
-      <div id="libhead" style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin:6px 0 4px;padding-left:180px;padding-right:44px"><span>Partner Brief Library</span><span>| handoff</span><span>Master Creative Tracker</span></div>
-      <div id="rows"><div class="loading">Loading…</div></div>
-      <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><span id="title" style="font-size:15px;font-weight:600"></span><span id="total" style="font-size:13px;color:var(--text-secondary)"></span></div>
-        <div class="meta" id="dmeta"></div>
-        <div class="bnote" id="bnote"></div>
-        <div class="chk" id="dchecks"></div>
-        <div id="detail"></div>
+    <section>
+      <div class="sh"><div><h2>The typical brief <span id="typ-info"></span></h2></div><p class="sub" id="typ-sub"></p></div>
+      <div class="card" id="typical"></div>
+    </section>
+    <section>
+      <div class="sh">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h2>Every brief <span id="every-info"></span></h2>
+          <div class="seg" role="group" aria-label="Detail level"><button type="button" data-mode="phase" id="mode-phase">5 phases</button><button type="button" data-mode="steps" id="mode-steps">All 17 steps</button></div></div>
+        <div class="legend"><span><i class="swatch breach" style="background:transparent"></i>Missed a deadline</span><span><i class="swatch ph-queue"></i>Waiting in a queue</span><span><i class="swatch ph-hold"></i>On hold</span></div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">Average days per phase</div>
-<p class="why"><b>What it shows:</b> the typical number of days each stage takes, across the briefs shown above (finished stages only). <b>How to read it:</b> the stacked bar at the top adds the stage averages together into one typical brief, from Briefing Start to launch, for the period chosen in the start-date filter (last 90 days by default). Below it, each stage on its own: longer bar = slower stage. Colours match the teams in the timeline. Late send to partner is the days Partnerships sent after the 1st of the brief month, counting on-time sends as 0. <b>Use it to:</b> see where the process loses the most time on average.</p>
-      <div id="avgrow"></div>
-      <div id="avg"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Median days per phase</div>
-      <p class="why"><b>What it shows:</b> the middle value for each stage: half the briefs were faster, half were slower (finished stages only, briefs shown above). <b>How to read it:</b> compare it with the average above. If the average is much higher than the median, a few very slow briefs are dragging the average up, and a typical brief is closer to the median. <b>Use it to:</b> tell a stage that is slow for everyone apart from one that has a handful of outliers.</p>
-      <div id="med"></div>
-    </div>
-    <p class="foot">The Brief Library clock starts at Briefing Start Date (or the first milestone filled in, if that's blank); a stage with no date is folded into the stage before it. ⚑ flags a brief that was ready after its Brief Due Date, was ready before the 1st of the month in its name but sent to the partner after it, the partner took more than 10 days to submit footage, or footage review took more than 2 days. The ⚑ sits on the stage that caused it. <span class="live"></span> marks a brief that is still moving; its current stage counts up to today.</p>
+      <div class="card" style="padding:8px 24px 16px"><div class="brtable" id="brtable"></div></div>
+    </section>
+    <section id="bd" class="card" hidden></section>
   </section>
 
-  <!-- ============ Trends ============ -->
-  <section class="tabpanel" id="tab-trends" role="tabpanel" hidden>
-    <div class="windowbar"><span class="lbl">Window</span><div class="seg" data-window></div><span class="pnote">grouped by launch month · all partner briefs</span></div>
-    <div class="kpis kpis-3" id="tkpis"></div>
-    <div class="card">
-      <div class="chead"><div class="ctitle">Lead time by launch month</div>
-        <div class="legend-inline"><span><i style="background:var(--series-pbl)"></i>Partner Brief Library days</span><span><i style="background:var(--series-mct)"></i>Master Creative Tracker days</span><span><i class="dash"></i><span id="targetlbl">Target</span></span></div></div>
-<p class="why"><b>What it shows:</b> the official lead time (counted days from Briefing Start to launch, holds excluded) for the briefs that launched each month. <b>How to read it:</b> the bar's height is the lead time; orange and cream split it between the Brief Library and the MCT in proportion to the time spent in each, and the dashed line is the <span class="tgt">28-day</span> target. Faded bars had fewer than 5 launches, so treat them with caution. <b>Use it to:</b> tell whether we're getting faster or slower overall, and which half of the process is driving it.</p>
-      <div class="chartbox" style="height:280px"><canvas id="c-lead" role="img" aria-label="Average lead time by launch month"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Average days per stage, by month the stage finished</div>
-<p class="why"><b>What it shows:</b> the average days for each stage, month by month. <b>How to read it:</b> the big number is the latest month; the small number is the change since the start of the window. A red outline means that stage is getting slower. Hover a tile for each month's value. <b>Use it to:</b> catch a single stage creeping up before it shows in the overall lead time.</p>
-      <div class="tiles" id="tiles"></div>
-    </div>
+  <!-- TRENDS -->
+  <section class="panel" id="tab-trends" role="tabpanel" aria-labelledby="tab-btn-trends" hidden>
+    <div class="grid3" id="tr-big"></div>
+    <section>
+      <div class="sh">
+        <div><h2>Are we getting faster? <span id="lead-info"></span></h2><p class="sub">Lead time by the month briefs launched.</p></div>
+        <div class="legend"><span><i class="swatch" style="background:#FF6A13"></i>Brief Library (brief + filming + CS review)</span><span><i class="swatch" style="background:#E9D5B7"></i>Production (editing + launch)</span><span><i style="display:inline-block;width:16px;border-top:2px dashed #A8A098"></i><span id="tgt-lbl">Target</span></span></div>
+      </div>
+      <div class="card"><div class="chartbox" style="height:300px"><canvas id="c-lead" role="img" aria-label="Lead time by launch month"></canvas></div><p class="note" id="lead-note"></p></div>
+    </section>
+    <section>
+      <div class="sh">
+        <div><h2>Which step is slowing down? <span id="step-info"></span></h2><p class="sub">Every step, grouped by phase. Big number is the latest month's average; the change is since the start of the window.</p></div>
+        <div class="legend"><span><i class="swatch breach" style="background:transparent"></i>Getting slower</span><span>"Too few" = under 5 finished</span></div>
+      </div>
+      <div id="phrows"></div>
+    </section>
+    <section>
+      <div class="sh"><div><h2>Is anyone overloaded? <span id="wip-info"></span></h2><p class="sub" id="wip-sub"></p></div></div>
+      <div class="grid2"><div class="card"><h3>Creative strategists</h3><div id="wip-cs"></div></div><div class="card"><h3>Editors</h3><div id="wip-ed"></div><p class="note" id="wip-un"></p></div></div>
+    </section>
+    <section>
+      <div class="sh"><div><h2>Assets launched per month <span id="assets-info"></span></h2><p class="sub">Total Assets on MCT items, by Launch Date.</p></div></div>
+      <div class="card"><div class="chartbox" style="height:220px"><canvas id="c-assets" role="img" aria-label="Assets launched per month"></canvas></div></div>
+    </section>
   </section>
 
-  <!-- ============ Deadlines & capacity ============ -->
-  <section class="tabpanel" id="tab-deadlines" role="tabpanel" hidden>
-    <div class="windowbar"><span class="lbl">Window</span><div class="seg" data-window></div><span class="pnote">all partner briefs</span></div>
-    <div class="two">
-      <div class="card">
-        <div class="ctitle">On-time rate by brief month</div>
-<p class="why"><b>What it shows:</b> the share of briefs that hit every deadline (no ⚑ flag), grouped by the month in the brief name. <b>How to read it:</b> higher is better. The current month is still in progress, so its number moves during the month. <b>Use it to:</b> track whether deadlines are being hit more often over time.</p>
-        <div class="chartbox" style="height:200px"><canvas id="c-ontime" role="img" aria-label="On-time rate by brief month"></canvas></div>
+  <!-- PARTNERS -->
+  <section class="panel" id="tab-partners" role="tabpanel" aria-labelledby="tab-btn-partners" hidden>
+    <div class="grid3" id="pa-big"></div>
+    <section>
+      <div class="sh">
+        <div><h2>Are partners sending footage on time? <span id="ot-info"></span></h2><p class="sub" id="ot-sub"></p></div>
+        <div class="legend"><span><i class="swatch" style="background:var(--green)"></i>On time</span><span><i class="swatch" style="background:var(--red-sq)"></i>Late or still missing</span></div>
       </div>
-      <div class="card">
-        <div class="ctitle">Footage days late vs Footage Due Date, by partner</div>
-        <div class="pnote" id="prnote"></div><p class="why"><b>What it shows:</b> how many days after the Footage Due Date each partner delivers footage, on average. <b>How to read it:</b> green = on time, yellow = up to 5 days late, red = 5+ days late. Hover a bar to see each brief. <b>Use it to:</b> know which partners need a nudge or a firmer deadline.</p>
-        <div id="pr"></div>
+      <div class="card"><div class="cbars" id="otbars"></div><p class="note">Grouped by the Brief Month. Briefs still with the partner after <span class="fl"></span> days count as late.</p></div>
+    </section>
+    <section>
+      <div class="sh">
+        <div><h2>Who sends footage late <span id="heat-info"></span></h2><p class="sub" id="heat-sub"></p></div>
+        <div class="legend"><span><i class="swatch" style="background:var(--green)"></i>All on time</span><span><i class="swatch" style="background:var(--yellow)"></i>Some late (1/2 = 1 of 2 late)</span><span><i class="swatch" style="background:var(--red-sq)"></i>All late</span><span><i class="swatch" style="background:var(--card-2)"></i>No brief</span><span><i class="swatch cell cant" style="height:10px"></i>Date missing or wrong</span></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Open sprints per person <span class="pnote" id="wipnote"></span></div>
-<p class="why"><b>What it shows:</b> how many briefs each person is actively responsible for right now, based on the stage each brief is in. <b>How to read it:</b> the dashed line is the limit of 5; red bars are over it. Hover a bar to see which briefs. <b>Use it to:</b> rebalance work before someone becomes the bottleneck.</p>
-      <div class="two" style="margin-top:6px"><div><div class="sublbl">Creative strategists</div><div id="wip-cs"></div></div><div><div class="sublbl">Editors</div><div id="wip-ed"></div></div></div>
-    </div>
-    <div class="two">
-      <div class="card">
-        <div class="ctitle">Assets launched per month</div>
-<p class="why"><b>What it shows:</b> how many finished assets we shipped each month (Total Assets on launched MCT items). <b>How to read it:</b> taller bars = more output. Hover for the number of MCT items behind it. <b>Use it to:</b> check that output keeps up as the partner programme grows.</p>
-        <div class="chartbox" style="height:190px"><canvas id="c-assets" role="img" aria-label="Assets launched per month"></canvas></div>
-      </div>
-    </div>
+      <div class="card"><div class="tablewrap" id="heat"></div><p class="note">Sorted by share of briefs late, worst first. Hover a square for each brief.</p></div>
+    </section>
+    <section>
+      <div class="sh"><div><h2>Data to fix <span id="fix-info"></span></h2><p class="sub">Briefs that can't be checked because a date is missing or wrong. Fill them in Notion.</p></div></div>
+      <div class="card"><div class="fixlist" id="fixlist"></div></div>
+    </section>
   </section>
 
-  <!-- ============ Spend check ============ -->
-  <section class="tabpanel" id="tab-spend" role="tabpanel" hidden>
-    <div class="kpis" id="skpis"></div>
-    <div class="card">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Partner spend check</div>
-          <div class="pnote" id="ssub"></div>
-        </div>
-      </div>
-      <p class="why"><b>What it shows:</b> every <b>Active</b> partner in the Partners Database with $0 spend in the last 7 days, and why: the first reason that applies from their sprints in the Master Creative Tracker and briefs in the Partner Brief Library. <b>How to read it:</b> red = $0 spend now, with the reason, the owner, and the sprint that's furthest along; yellow = still spending but no new ads in 14 days and nothing ready, in review or in production, so they'll hit $0 soon. <b>Use it to:</b> copy the Slack message below and post it. This tab is read-only: it never posts or edits anything.</p>
-      <div id="slist"></div>
-    </div>
-    <div class="card">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Slack message</div>
-          <div class="pnote">Formatted for Slack. Copy it and post it in your channel. If nothing is flagged, there's nothing to post.</div>
-        </div>
-        <button id="copyspend" class="btn-accent" type="button">Copy message</button>
-      </div>
-      <pre class="slack" id="smsg"></pre>
-    </div>
-  </section>
-
-  <!-- ============ Weekly report ============ -->
-  <section class="tabpanel" id="tab-report" role="tabpanel" hidden>
-    <div class="card">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Written summary for leadership</div>
-          <div class="pnote">Generated from the boxes below for the selected week. Copy and paste straight into Slack or email.</div>
-        </div>
-        <div style="display:flex;gap:8px"><select id="week" aria-label="Report week"></select><button id="copysum" class="btn-accent" type="button">Copy summary</button></div>
+  <!-- WEEKLY REPORT -->
+  <section class="panel" id="tab-report" role="tabpanel" aria-labelledby="tab-btn-report" hidden>
+    <section class="card">
+      <div class="sh" style="margin:0">
+        <div><h2>Leadership summary <span id="sum-info"></span></h2><p class="sub" id="rsub"></p></div>
+        <button type="button" class="btn btn-primary" id="copysum">Copy summary</button>
       </div>
       <div class="summary" id="summary"></div>
-    </div>
-    <div class="card" id="overview-card">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Status overview for the week</div>
-          <div class="pnote" id="ovsub"></div>
-        </div>
-        <button id="copyov" class="btn-accent" type="button">Copy overview</button>
+    </section>
+    <section>
+      <div class="sh"><div><h2>Deadlines this week <span id="dl-info"></span></h2><p class="sub">How many missed the limit, out of how many were checked.</p></div></div>
+      <div class="grid4" id="rcards"></div>
+    </section>
+    <section>
+      <div class="sh"><div><h2>How each phase is pacing <span id="pace-info"></span></h2><p class="sub">Average days, last 4 weeks vs the 4 before.</p></div></div>
+      <div class="card"><div class="tablewrap" id="pace"></div></div>
+    </section>
+    <section>
+      <div class="sh">
+        <div><h2>Status overview <span id="ov-info"></span></h2><p class="sub" id="ovsub"></p></div>
+        <button type="button" class="btn" id="copyov">Copy overview</button>
       </div>
-      <div class="ovgrid" id="overview"></div>
-    </div>
-
-    <div class="card" id="report">
-      <div class="chead">
-        <div>
-          <div class="ctitle">Weekly report</div>
-          <div class="pnote" id="rsub"></div>
-        </div>
-      </div>
-<p class="why"><b>What it shows:</b> the four deadline checks for the week, rebuilt from Notion as of the Tuesday before the report date. <b>How to read it:</b> the big number is how many missed the limit this week out of how many were checked. "8-week average" is the normal level; "Right now" is what's still overdue. Open the lists to see the briefs. <b>Use it to:</b> see which team's deadlines slipped this week and what's still outstanding.</p>
-      <div class="rcards" id="rcards"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">How long each step is taking right now</div>
-      <div class="pnote" id="rstepnote"></div><p class="why"><b>What it shows:</b> the current pace of every stage. <b>How to read it:</b> "Last 4 wks" vs "Prior 4 wks" shows whether a stage sped up (▼ cyan) or slowed down (▲ red). "In stage now" is how many briefs are waiting there and for how long. <b>Use it to:</b> find this month's bottleneck.</p>
-      <div style="overflow-x:auto"><table class="rt" id="rsteps"></table></div>
-    </div>
+      <div class="card"><div class="ovgrid" id="overview"></div></div>
+    </section>
   </section>
+  </main>
 </div>
-<div id="tip"></div>
+<div id="tip" role="tooltip"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
@@ -420,7 +422,7 @@ var EXCLUDED_STATUSES = ['Archive', 'Test Status'];
 
 // Charts and reports
 var MIN_MONTH_SAMPLE = 5;          // months with fewer launches are faded and not used for trend comparisons
-var MIN_TILE_SAMPLE = 3;           // same idea for the per-stage tiles
+var MIN_TILE_SAMPLE = 5;           // a stage month needs this many finished briefs; fewer shows "too few"
 var REPORT_WEEKS = 12, TREND_WEEKS = 8;
 var SPEND_STALE_DAYS = 2;          // spend data older than this skips the spend check
 
@@ -638,6 +640,14 @@ function stageFlags(f, reached, current, days, reviewD) {
   return by;
 }
 
+// ---- Partner names ----
+// Partner matching: drop dots/commas/case, then map known alternate spellings to one name.
+function partnerClean(n) { return String(n || '').toLowerCase().replace(/[.,]/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim(); }
+var ALIAS_KEYS = {};
+Object.keys(PARTNER_ALIASES).forEach(function (k) { ALIAS_KEYS[partnerClean(k)] = partnerClean(PARTNER_ALIASES[k]); });
+function partnerKey(n) { var c = partnerClean(n); return ALIAS_KEYS[c] || c; }
+var normName = partnerKey;
+
 // ---- State ----------------------------------------------------------------
 var ALL = [], BASE = [], VIEW = [], SELECTED = null;
 var ROSTER_ONLY = ROSTER_ONLY_DEFAULT;
@@ -699,214 +709,21 @@ function buildAll() {
   else if (useRoster && hidden) { note.hidden = false; note.textContent = hidden + ' briefs from partners not on the current roster are hidden. Untick "Current roster only" to see them.'; }
   else note.hidden = true;
 }
-function rebuild() {
-  buildAll();
-  applyFilters(); renderReport(); renderOverview(); renderSpend(); markDirty();
-}
+
 var $ = function (id) { return document.getElementById(id); };
 var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
-function legend() {
-  $('legend').innerHTML = 'Phase' + PHASES.map(function (ph) {
-    return '<span class="sw ph-' + ph.key + '"></span>' + ph.name + ' (' + ph.owner + ')';
-  }).join('') + '<span class="sw ph-edit ph-queue"></span>Waiting in queue<span class="sw ph-hold"></span>On hold';
-}
-
-// Every filter except the start date (lead time filters on launch date instead).
-function passesFilters(x) {
-  var q = $('q').value.trim().toLowerCase(), mo = $('month').value, pr = $('product').value, ph = $('phase').value;
-  if (q && (x.name + ' ' + (x.partner || '')).toLowerCase().indexOf(q) < 0) return false;
-  if (mo && x.month !== mo) return false;
-  if (pr && (x.product || []).indexOf(pr) < 0) return false;
-  if (ph === 'flag' ? !x.s.flags.late.length : ph && x.s.phase !== ph) return false;
-  return true;
-}
-function applyFilters() {
-  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null, so = $('sort').value;
-  VIEW = ALL.filter(function (x) {
-    if (since != null && dayNum(x.d.created || x.createdTime) < since) return false;
-    return passesFilters(x);
-  });
-  VIEW.sort(so === 'long' ? function (a, b) { return b.s.lead - a.s.lead; }
-    : so === 'name' ? function (a, b) { return a.name.localeCompare(b.name); }
-    : function (a, b) { return (b.d.created || b.createdTime) < (a.d.created || a.createdTime) ? -1 : 1; });
-  renderRows(); renderAvgRow(); renderKpis(); renderAverages();
-  if (!VIEW.length) { $('title').textContent = ''; $('total').textContent = ''; $('dmeta').innerHTML = ''; $('bnote').innerHTML = ''; $('dchecks').innerHTML = ''; $('detail').innerHTML = ''; return; }
-  var keep = VIEW.filter(function (x) { return x.id === SELECTED; })[0];
-  show(keep ? keep.id : VIEW[0].id);
-}
-
-function segAttrs(x, j) {
-  return ' data-b="' + x.id + '" data-j="' + j + '"';
-}
-function seg(x, j) {
-  var d = x.s.days[j];
-  var fl = x.s.flags.byStage[j];
-  if (!d && !fl) return '';
-  return '<div class="' + stCls(j) + (fl ? ' fseg' : '') + '" style="flex:' + (d || 0.6) + '"' + segAttrs(x, j) + '>' + (fl ? '<span class="fb">⚑</span>' : '') + (d > 1 ? d : '') + '</div>';
-}
-
-// Pinned row: the average days per stage across the briefs shown (default: started in the last 90 days).
-function periodStages(list) {
-  return STAGES.map(function (st, j) {
-    var vals = list.filter(function (x) { return x.s.reached[j] && x.s.current !== j; }).map(function (x) { return x.s.days[j]; });
-    return { j: j, avg: avg(vals), med: median(vals), n: vals.length };
-  });
-}
-function rangeLabel() {
-  var r = $('range').value;
-  return r ? 'started in the last ' + r + ' days' : 'any start date';
-}
-function renderAvgRow() {
-  if (!VIEW.length) { $('avgrow').innerHTML = ''; return; }
-  var st = periodStages(VIEW).filter(function (x) { return x.j !== HOLD && x.avg != null; });
-  var pbl = sum(st.filter(function (x) { return x.j < PBL_N; }).map(function (x) { return x.avg; }));
-  var mct = sum(st.filter(function (x) { return x.j >= PBL_N; }).map(function (x) { return x.avg; }));
-  function seg(x) {
-    if (x.avg < 0.05) return '';
-    var S = STAGES[x.j];
-    var t = '<b>' + S[0] + '</b> · ' + S[1] + '<div>Average ' + r1(x.avg) + ' days' + (x.j === 2 ? ' past the 1st' : '') + ' · median ' + r1(x.med) + '</div><div class="m">Across ' + x.n + ' briefs ' + rangeLabel() + ' that finished this stage</div>';
-    return '<div class="' + stCls(x.j) + '" style="flex:' + x.avg + '" data-tipx="' + esc(t) + '">' + (x.avg >= 1.5 ? r1(x.avg) : '') + '</div>';
-  }
-  var bar = st.filter(function (x) { return x.j < PBL_N; }).map(seg).join('') + '<div class="hand" data-hand="1"></div>' + st.filter(function (x) { return x.j >= PBL_N; }).map(seg).join('');
-  $('avgrow').innerHTML = '<div class="avgrow"><div class="srow"><span class="lbl2"><b>Average brief</b>' + VIEW.length + ' briefs ' + rangeLabel() + '</span>' +
-    '<div style="flex:1;display:flex;min-width:0"><div class="sbar" style="flex:1">' + bar + '</div></div>' +
-    '<span style="width:60px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600" title="Stage averages added up">Σ ' + r1(pbl + mct) + 'd</span></div>' +
-    '<div class="pnote">' + r1(pbl) + 'd in the Brief Library + ' + r1(mct) + 'd in the MCT. Each segment is that stage\'s average for briefs that finished it, and Σ adds them up. That is not the official lead time (shown in the cards above as the ' + LEAD_WORD + ' of actual launched briefs). Change the start-date filter above to use a different period.</div></div>';
-}
-
-function renderRows() {
-  var rows = $('rows');
-  if (!VIEW.length) { rows.innerHTML = '<div class="empty">No briefs match these filters.</div>'; return; }
-  var max = Math.max.apply(null, VIEW.map(function (x) { return x.s.total; })) || 1;
-  var html = VIEW.map(function (x) {
-    var t = x.s.total, bar = '';
-    for (var j = 0; j < PBL_N; j++) bar += seg(x, j);
-    if (x.s.hasMct) {
-      bar += '<div class="hand" data-hand="1"></div>';
-      for (j = PBL_N; j < STAGES.length; j++) bar += seg(x, j);
-    }
-    var fl = x.s.flags.late.length ? '<span class="flag" data-flag="' + x.id + '">⚑</span>' : '';
-    return '<div class="srow" data-id="' + x.id + '"><span style="width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(x.name) + '">' + fl + esc(x.name) + notOnRosterTag(x) + '</span>' +
-      (bar ? '<div style="flex:1;display:flex;min-width:0"><div class="sbar" style="flex:' + Math.max(t, 0.5) + '">' + bar + '</div><div style="flex:' + Math.max(max - t, 0) + '"></div></div>'
-        : '<div style="flex:1;font-size:11px;color:var(--text-muted)">Briefing not started</div>') +
-      '<span style="width:34px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums" title="Counted days, briefing → ' + (x.s.launched ? 'launch' : 'today') + ', holds excluded">' + x.s.lead + 'd' + (x.s.open ? '<span class="live" title="Still in progress"></span>' : '') + '</span></div>';
-  }).join('');
-  rows.innerHTML = html;
-}
-
-function show(id) {
-  SELECTED = id;
-  document.querySelectorAll('.srow').forEach(function (e) { e.classList.toggle('on', e.dataset.id === id); });
-  var x = ALL.filter(function (b) { return b.id === id; })[0]; if (!x) return;
-  var s = x.s, t = s.total || 1;
-  $('title').innerHTML = esc(x.name) + notOnRosterTag(x);
-  $('total').textContent = s.hasMct ? s.pbl + 'd in the Brief Library + ' + mctWork(s) + 'd in production = ' + s.lead + ' days' + (s.launched ? ' lead time' : ' so far') + (s.days[HOLD] ? ' (' + s.days[HOLD] + 'd on hold not counted)' : '') : s.pbl + 'd in the Brief Library' + (s.open ? ' so far' : '') + ' · not yet in the MCT';
-  var meta = ['PBL status: ' + esc(x.status)];
-  if (x.mct && !x.mct.missing) meta.push('MCT status: ' + esc(x.mct.status));
-  if (x.partner) meta.push('Partner: ' + esc(x.partner));
-  meta.push('<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open brief ↗</a>');
-  if (x.mct && x.mct.url) meta.push('<a href="' + esc(x.mct.url) + '" target="_blank" rel="noopener">Open MCT item ↗</a>');
-  $('dmeta').innerHTML = meta.map(function (m) { return '<span>' + m + '</span>'; }).join('');
-  $('dchecks').innerHTML = checksHtml(x.s.flags);
-  $('bnote').innerHTML = esc(briefNote(x)).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-
-  var start = 0, h = '', big = Math.max.apply(null, s.days);
-  var last = s.hasMct ? STAGES.length : PBL_N;
-  for (var j = 0; j < last; j++) {
-    if (j === HOLD && !s.reached[HOLD]) continue;
-    if (j === 0) h += '<div class="sec">Partner Brief Library</div>';
-    if (j === PBL_N) h += '<div class="sec">Master Creative Tracker</div>';
-    var st = STAGES[j], d = s.days[j], w = d === big && d > 0, r = s.reached[j], sf = s.flags.byStage[j];
-    h += '<div class="g"' + (r ? segAttrs(x, j) : '') + '><span style="color:' + (w || sf ? 'var(--text-danger)' : r ? 'var(--text-primary)' : 'var(--text-muted)') + '">' + (sf ? '⚑ ' : '') + st[0] + (s.current === j ? '<span class="live"></span>' : '') + '</span>' +
-      '<span class="pill ' + stCls(j) + '" title="' + esc(st[1]) + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
-      '<div style="position:relative;height:14px;background:var(--surface-1);border-radius:4px">' +
-      (r ? '<div class="' + stCls(j) + '" style="position:absolute;left:' + (start / t * 100) + '%;width:' + (d / t * 100) + '%;min-width:3px;height:100%;border-radius:4px;' + (w ? 'outline:1.5px solid #fff;' : '') + '"></div>' : '') +
-      '</div><span style="text-align:right;font-variant-numeric:tabular-nums;' + (w ? 'color:var(--text-danger);font-weight:600' : r ? '' : 'color:var(--text-muted)') + '">' + (!r ? '–' : d === 0 ? (j === 2 ? '0' : '<1') : d) + '</span></div>';
-    start += d;
-  }
-  $('detail').innerHTML = h;
-}
-
-function stageNote(f, j) {
-  var fl = (f.byStage[j] || []).map(function (m) { return '<div style="margin-top:4px;color:var(--text-danger)">⚑ ' + m + '</div>'; }).join('');
-  if (j === 3 && f.filmDays != null && !fl) return '<div style="margin-top:4px">Within the ' + FILMING_LIMIT + '-day filming window</div>';
-  if (fl) return fl;
-  if ((j === 0 || j === 1) && f.readyDays != null) return '<div style="margin-top:4px">Brief ready in ' + f.readyDays + 'd' + (f.readyLate ? ' · <span style="color:var(--text-danger)">⚑ ' + f.readyLate + 'd past due</span>' : '') + '</div>';
-  if (j === 2 && f.sendDeadline) return '<div style="margin-top:4px">' + (f.sendApplies ? 'Days sent after the ' + fmt(f.sendDeadline) + ' deadline' : 'Ready after ' + fmt(f.sendDeadline) + ', no send deadline') + '</div>';
-  return '';
-}
-
-function checksHtml(f) {
-  var out = [];
-  if (f.readyDays != null) {
-    var r = 'Brief ready in <b>' + f.readyDays + ' days</b>' + (f.readyDone ? '' : ' so far');
-    if (f.readyDue) r += f.readyLate ? ' · <span class="bad">⚑ ' + f.readyLate + 'd past the ' + fmt(f.readyDue) + ' due date</span>' : ' · <span class="ok">due ' + fmt(f.readyDue) + '</span>';
-    out.push(r);
-  }
-  if (f.sendDeadline) {
-    var s = f.sent ? 'Sent to partner <b>' + fmt(f.sent) + '</b>' : 'Not sent to partner yet';
-    s += f.sendLate ? ' · <span class="bad">⚑ ' + f.sendLate + 'd after the ' + fmt(f.sendDeadline) + ' deadline</span>'
-      : f.sendApplies ? ' · <span class="ok">deadline ' + fmt(f.sendDeadline) + '</span>' : ' · <span class="ok">ready after ' + fmt(f.sendDeadline) + ', no send deadline</span>';
-    out.push(s);
-  }
-  if (f.filmDays != null) {
-    var p = (f.filmDone ? 'Partner submitted in <b>' : 'Partner filming for <b>') + f.filmDays + ' days</b>';
-    p += f.filmLate ? ' · <span class="bad">⚑ ' + f.filmLate + 'd over the ' + FILMING_LIMIT + '-day limit</span>' : ' · <span class="ok">limit ' + FILMING_LIMIT + 'd</span>';
-    out.push(p);
-  }
-  return out.map(function (h) { return '<span>' + h + '</span>'; }).join('');
-}
 
 function avg(a) { return a.length ? sum(a) / a.length : null; }
 function r1(n) { return n == null ? '–' : (Math.round(n * 10) / 10).toString(); }
-
-function renderKpis() {
-  // Lead time uses briefs *launched* in the chosen period, with the other filters applied.
-  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null;
-  var launchedIn = ALL.filter(function (x) { return x.s.launched && passesFilters(x) && (since == null || dayNum(x.mct.d.launch) >= since); });
-  var handed = VIEW.filter(function (x) { return x.s.hasMct; });
-  var lt = leadTime(launchedIn);
-  var cards = [
-    ['Briefs shown', VIEW.length, VIEW.filter(function (x) { return x.s.open; }).length + ' in progress'],
-    [LEAD_LABEL, r1(lt), launchedIn.length + ' launched ' + (range ? 'in the last ' + range + ' days' : 'in total') + ' · target ' + TARGET_LEAD_DAYS],
-    ['Brief Library phase (' + LEAD_WORD + ')', r1(LEAD_FN(handed.map(function (x) { return x.s.pbl; }))), handed.length + ' handed off to the MCT'],
-    ['Production phase (' + LEAD_WORD + ')', r1(LEAD_FN(launchedIn.map(function (x) { return mctWork(x.s); }))), 'MCT days, holds excluded']
-  ];
-  $('kpis').innerHTML = cards.map(function (c) {
-    return '<div class="kpi"><div class="l">' + c[0] + '</div><div class="v">' + c[1] + (typeof c[1] === 'string' && c[1] !== '–' ? '<small>days</small>' : '') + '</div><div class="pnote">' + c[2] + '</div></div>';
-  }).join('');
-}
 
 function median(a) {
   if (!a.length) return null;
   var b = a.slice().sort(function (x, y) { return x - y; }), m = Math.floor(b.length / 2);
   return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2;
-}
-function renderAverages() {
-  renderPhaseBars('avg', avg, 'Average');
-  renderPhaseBars('med', median, 'Median');
-}
-function renderPhaseBars(id, fn, label) {
-  // Only finished stages: the stage a brief is sitting in right now would drag the numbers down.
-  var stats = STAGES.map(function (st, j) {
-    var vals = VIEW.filter(function (x) { return x.s.reached[j] && x.s.current !== j; }).map(function (x) { return x.s.days[j]; });
-    return { j: j, avg: fn(vals), n: vals.length };
-  });
-  var max = Math.max.apply(null, stats.map(function (s) { return s.avg || 0; })) || 1;
-  var h = '';
-  stats.forEach(function (s) {
-    if (s.j === HOLD && !s.n) return;
-    if (s.j === 0) h += '<div class="sec">Partner Brief Library</div>';
-    if (s.j === PBL_N) h += '<div class="sec">Master Creative Tracker</div>';
-    var st = STAGES[s.j];
-    h += '<div class="avg" data-avg="' + s.j + '" data-lbl="' + label + '" data-n="' + s.n + '" data-v="' + r1(s.avg) + '"><span>' + st[0] + '</span><span class="pill ' + stCls(s.j) + '" style="overflow:hidden;text-overflow:ellipsis">' + st[1] + '</span>' +
-      '<div class="track"><div class="fill ' + stCls(s.j) + '" style="width:' + ((s.avg || 0) / max * 88) + '%"></div><span class="val" style="left:' + ((s.avg || 0) / max * 88) + '%">' + (s.n ? r1(s.avg) + 'd' : 'no data') + '</span></div></div>';
-  });
-  $(id).innerHTML = h;
 }
 
 // ---- Weekly report (every Wednesday) ---------------------------------------
@@ -928,7 +745,7 @@ function reportFor(wed) {
   var S = ALL.map(function (b) { return { b: b, s: computeStages(b, end) }; }).filter(function (x) { return x.s.reached.some(Boolean); });
   function metric(done, openNow) {
     var hits = done.filter(function (x) { return x.late > 0; });
-    return { n: hits.length, of: done.length, avgOver: avg(hits.map(function (x) { return x.late; })), hits: hits, open: openNow };
+    return { n: hits.length, of: done.length, avgOver: avg(hits.map(function (x) { return x.late; })), hits: hits, all: done, open: openNow };
   }
   // 1. CS: brief ready after its Brief Due Date
   var cs = metric(S.filter(function (x) { return inRange(x.b.d.briefReady, start, end) && x.b.d.briefDue; })
@@ -978,131 +795,6 @@ function reportFor(wed) {
   return r;
 }
 
-var REPORT_METRICS = [
-  ['cs', 'Briefs ready past due date', 'CS', 'Brief Ready Date after Brief Due Date', 'ready this week', 'past due, not ready'],
-  ['pt', 'Late partner footage', 'Partner', 'Footage received more than ' + FILMING_LIMIT + ' days after the brief was sent', 'received this week', 'waiting over ' + FILMING_LIMIT + 'd'],
-  ['rv', 'Footage review over ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT, 'CS', 'Footage Received to the next step', 'reviewed this week', 'in review over ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT],
-  ['mc', 'Stuck in MCT over ' + MCT_STUCK_LIMIT + ' days', 'MCT', 'Handoff to launch, time on hold not counted', 'launched this week', 'in MCT over ' + MCT_STUCK_LIMIT + 'd']
-];
-
-function renderReport() {
-  if (!ALL.length) return;
-  REPORT_CACHE = {};
-  var weds = reportWednesdays(), sel = $('week'), cur = sel.value;
-  sel.innerHTML = weds.slice(0, REPORT_WEEKS).map(function (w, i) {
-    return '<option value="' + w + '">' + (i === 0 ? 'Latest · ' : '') + 'Wed ' + fmt(w) + '</option>';
-  }).join('');
-  sel.value = weds.indexOf(cur) >= 0 && weds.indexOf(cur) < REPORT_WEEKS ? cur : weds[0];
-  var r = reportFor(sel.value), wi = weds.indexOf(sel.value);
-  var trend = weds.slice(wi, wi + TREND_WEEKS).map(reportFor);
-  $('rsub').textContent = 'Report for Wednesday ' + fmt(r.wed) + ' · covers ' + fmt(r.start) + ' – ' + fmt(r.end) +
-    ' · all partner briefs (ignores the filters above) · a new report appears every Wednesday';
-
-  $('rcards').innerHTML = REPORT_METRICS.map(function (m) {
-    var x = r[m[0]], wk = avg(trend.map(function (t) { return t[m[0]].n; }));
-    var pct = x.of ? Math.round(x.n / x.of * 100) + '%' : '–';
-    function list(items, label) {
-      if (!items.length) return '';
-      return '<details><summary>' + items.length + ' ' + label + '</summary><ul>' + items.slice().sort(function (a, b) { return b.late - a.late; }).map(function (h) {
-        return '<li><a href="' + esc(h.x.b.url) + '" target="_blank" rel="noopener">' + esc(h.x.b.name) + '</a> · +' + h.late + 'd</li>';
-      }).join('') + '</ul></details>';
-    }
-    return '<div class="rc"><div><div class="l">' + m[1] + '</div><div class="who">' + m[2] + ' · ' + m[3] + '</div></div>' +
-      '<div class="v">' + x.n + '<small>of ' + x.of + ' ' + m[4] + ' (' + pct + ')</small></div>' +
-      '<div class="row"><span>Avg days over the limit</span><b>' + (x.n ? r1(x.avgOver) + 'd' : '–') + '</b></div>' +
-      '<div class="row"><span>' + TREND_WEEKS + '-week average</span><b>' + r1(wk) + ' / week</b></div>' +
-      '<div class="row"><span>Right now (' + fmt(r.end) + ')</span><b>' + x.open.length + ' ' + m[5] + '</b></div>' +
-      list(x.hits, 'this week') + list(x.open, 'still open') + '</div>';
-  }).join('');
-
-  $('rstepnote').textContent = 'Average days for stages finished in the 4 weeks to ' + fmt(r.end) + ', compared with the 4 weeks before, and the briefs sitting in each stage on ' + fmt(r.end) + '.';
-  var h = '<tr><th>Stage</th><th>Owner</th><th>Last 4 wks</th><th>Prior 4 wks</th><th>Change</th><th>Finished</th><th>In stage now</th><th>Avg days so far</th></tr>';
-  r.steps.forEach(function (st) {
-    if (st.j === HOLD && !st.nNow && !st.cur) return;
-    if (st.j === 0) h += '<tr class="sec"><td colspan="8">Partner Brief Library</td></tr>';
-    if (st.j === PBL_N) h += '<tr class="sec"><td colspan="8">Master Creative Tracker</td></tr>';
-    var S0 = STAGES[st.j], ch = st.now != null && st.prev != null ? st.now - st.prev : null;
-    h += '<tr><td>' + S0[0] + '</td><td><span class="pill ' + stCls(st.j) + '">' + S0[1] + '</span></td><td>' + (st.now != null ? r1(st.now) + 'd' : '–') +
-      '</td><td>' + (st.prev != null ? r1(st.prev) + 'd' : '–') + '</td><td class="' + (ch > 0.05 ? 'up' : ch < -0.05 ? 'down' : '') + '">' +
-      (ch == null ? '–' : (ch > 0 ? '▲ +' : ch < 0 ? '▼ ' : '') + r1(ch) + 'd') + '</td><td>' + st.nNow + '</td><td>' + st.cur + '</td><td>' + (st.cur ? r1(st.curAvg) + 'd' : '–') + '</td></tr>';
-  });
-  $('rsteps').innerHTML = h;
-  $('summary').innerHTML = summaryHtml(summaryModel());
-}
-
-// Leadership summary: short bullets built from the report cards.
-function summaryModel() {
-  var r = reportFor($('week').value), weds = reportWednesdays(), wi = weds.indexOf(r.wed), trend = weds.slice(wi, wi + TREND_WEEKS).map(reportFor);
-  function wk(k) { return avg(trend.map(function (t) { return t[k]; }).filter(function (v) { return v != null; })); }
-  function vsAvg(n, a) {
-    if (a == null) return '';
-    if (Math.abs(n - a) < 0.5) return 'in line with the ' + TREND_WEEKS + '-week average (' + r1(a) + ')';
-    return (n > a ? 'above' : 'below') + ' the ' + TREND_WEEKS + '-week average of ' + r1(a);
-  }
-  // Examples skip long-abandoned briefs so the call-outs reflect this week's work.
-  function worst(list, k) { return list.filter(function (h) { return h.late <= STALLED_DAYS; }).sort(function (a, b) { return b.late - a.late; }).slice(0, k).map(function (h) { return h.x.b.name.trim() + ' (+' + h.late + 'd)'; }); }
-  var sec = [];
-
-  var head = [];
-  head.push('**' + r.launched + ' partner creatives launched** (' + r.assets + ' assets), ' + vsAvg(r.launched, wk('launched')) + '.');
-  if (r.lead != null) head.push('Lead time (' + LEAD_WORD + ', briefing → launch): **' + r1(r.lead) + ' days** vs a ' + TARGET_LEAD_DAYS + '-day target' + (r.lead > TARGET_LEAD_DAYS ? ' (' + r1(r.lead - TARGET_LEAD_DAYS) + ' days over)' : ' (on target)') + '.');
-  head.push('In progress: **' + r.inPbl + '** in briefing/filming, **' + r.inMct + '** in production, ' + r.onHold + ' on hold.' + (r.stalled ? ' ' + r.stalled + ' more have stalled ' + STALLED_DAYS + '+ days and should be closed or archived.' : ''));
-  sec.push(['Headline', head]);
-
-  var att = [], M = { cs: r.cs, pt: r.pt, rv: r.rv, mc: r.mc };
-  function line(k, who, what, openTxt) {
-    var x = M[k], avgN = avg(trend.map(function (t) { return t[k].n; }));
-    var txt = '**' + who + ':** ' + (x.of ? x.n + ' of ' + x.of + ' ' + what + (x.n ? ', avg ' + r1(x.avgOver) + 'd over' : '') : 'nothing due this week');
-    if (avgN != null) txt += ' (usual: ' + r1(avgN) + '/week)';
-    txt += '.';
-    var openLive = x.open.filter(function (h) { return h.late <= STALLED_DAYS; }).length;
-    if (openLive) txt += ' ' + openLive + ' ' + openTxt + '.';
-    var w = worst(x.hits.concat(x.open), 2);
-    if (w.length) txt += ' Slowest: ' + w.join(', ') + '.';
-    att.push(txt);
-  }
-  line('cs', 'CS briefs late', 'briefs finished this week missed their due date', 'more are overdue now');
-  line('pt', 'Partner footage late', 'deliveries took over ' + FILMING_LIMIT + ' days', 'briefs are still waiting on footage past ' + FILMING_LIMIT + ' days');
-  line('rv', 'Footage review slow', 'reviews took over ' + FOOTAGE_REVIEW_LIMIT + ' days', 'reviews are over ' + FOOTAGE_REVIEW_LIMIT + ' days now');
-  line('mc', 'Slow in production', 'launches spent over ' + MCT_STUCK_LIMIT + ' days in the MCT', 'items are in the MCT past ' + MCT_STUCK_LIMIT + ' days');
-  sec.push(['Deadlines', att]);
-
-  var st = r.steps.filter(function (x) { return x.now != null && x.j !== HOLD && x.nNow >= 3; });
-  var pace = [];
-  var slowest = st.slice().sort(function (a, b) { return b.now - a.now; }).slice(0, 3);
-  if (slowest.length) pace.push('Slowest steps (last 4 weeks): ' + slowest.map(function (x) { return STAGES[x.j][0] + ' ' + r1(x.now) + 'd (' + STAGES[x.j][1] + ')'; }).join(', ') + '.');
-  var ch = st.filter(function (x) { return x.prev != null; }).map(function (x) { return { x: x, d: x.now - x.prev }; });
-  var worse = ch.filter(function (c) { return c.d >= 1; }).sort(function (a, b) { return b.d - a.d; }).slice(0, 2);
-  var better = ch.filter(function (c) { return c.d <= -1; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 2);
-  if (worse.length) pace.push('Getting slower: ' + worse.map(function (c) { return STAGES[c.x.j][0] + ' +' + r1(c.d) + 'd'; }).join(', ') + ' vs the prior 4 weeks.');
-  if (better.length) pace.push('Getting faster: ' + better.map(function (c) { return STAGES[c.x.j][0] + ' ' + r1(c.d) + 'd'; }).join(', ') + '.');
-  sec.push(['Where the time is going', pace]);
-
-  // One focus line: the metric furthest above its normal level.
-  var cand = ['cs', 'pt', 'rv', 'mc'].map(function (k) { var a = avg(trend.map(function (t) { return t[k].n; })) || 0; return { k: k, over: M[k].n - a, open: M[k].open.length }; })
-    .sort(function (a, b) { return (b.over + b.open / 2) - (a.over + a.open / 2); });
-  var names = { cs: 'getting CS briefs finished by their due date', pt: 'chasing partners for late footage', rv: 'clearing the footage review queue within ' + FOOTAGE_REVIEW_LIMIT + ' days', mc: 'unblocking items that have been in production over ' + MCT_STUCK_LIMIT + ' days' };
-  var focus = [];
-  if (cand.length && (cand[0].over > 0 || cand[0].open > 0)) focus.push('Biggest gap this week: ' + names[cand[0].k] + '.');
-  if (worse.length) focus.push('Watch ' + STAGES[worse[0].x.j][0] + ' (' + STAGES[worse[0].x.j][1] + '): it\'s the stage slowing down the most.');
-  if (focus.length) sec.push(['Focus for next week', focus]);
-
-  return { title: 'Partner content · weekly status · ' + fmt(r.start) + ' – ' + fmt(r.end), sec: sec };
-}
-function summaryHtml(m) {
-  return '<div style="font-weight:600;margin-bottom:8px">' + esc(m.title) + '</div>' + m.sec.map(function (s) {
-    return '<h4>' + esc(s[0]) + '</h4><ul>' + s[1].map(function (l) { return '<li>' + esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</li>'; }).join('') + '</ul>';
-  }).join('');
-}
-function summaryText(m) {
-  return [m.title].concat(m.sec.map(function (s) { return '\n' + s[0] + '\n' + s[1].map(function (l) { return '• ' + l.replace(/\*\*(.+?)\*\*/g, '$1'); }).join('\n'); })).join('\n');
-}
-$('week').addEventListener('change', renderReport);
-$('copysum').addEventListener('click', function () {
-  var t = summaryText(summaryModel()), btn = $('copysum');
-  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { btn.textContent = 'Copied'; }, function () { window.prompt('Copy the report:', t); })
-    .then(function () { setTimeout(function () { btn.textContent = 'Copy summary'; }, 1500); });
-});
 
 // ---- Spend check (read-only) ---------------------------------------------
 var RAW = [], SPEND = null;
@@ -1113,12 +805,7 @@ var S_PROD = ['Needs CS Briefing', 'Briefing', 'Review Brief', 'Needs Brief Edit
 var S_ORDER = S_PROD.slice(0, 6).concat(['V1 Review', 'Needs Revision', 'Revising', 'Final Review', 'Ready For Exec. Review', 'In Exec. Review'], S_READY, ['Launched']);
 var B_WAITING = ['Sent To Partner', 'Edits Requested', 'Revising Footage'];
 var B_CLOSED = ['Complete', 'Archive', 'Test Status'];
-// Partner matching: drop dots/commas/case, then map known alternate spellings to one name.
-function partnerClean(n) { return String(n || '').toLowerCase().replace(/[.,]/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim(); }
-var ALIAS_KEYS = {};
-Object.keys(PARTNER_ALIASES).forEach(function (k) { ALIAS_KEYS[partnerClean(k)] = partnerClean(PARTNER_ALIASES[k]); });
-function partnerKey(n) { var c = partnerClean(n); return ALIAS_KEYS[c] || c; }
-var normName = partnerKey;
+
 function stageRank(st) { var i = S_ORDER.indexOf(st); return i < 0 ? -1 : i; }
 function plural(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
 function slackDate(iso) { var d = new Date(dayNum(iso) * 864e5); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', timeZone: 'UTC' }); }
@@ -1230,55 +917,6 @@ function spendMessage(m) {
   return L.join('\n');
 }
 
-function renderSpend() {
-  var m = spendModel(), msg = spendMessage(m);
-  if (m.error) {
-    $('skpis').innerHTML = '';
-    $('ssub').textContent = '';
-    $('slist').innerHTML = '<div class="error">Spend check unavailable: ' + esc(m.error) + '. Check the integration is connected to the Partners Database.</div>';
-    $('smsg').textContent = ''; return;
-  }
-  var cards = [
-    ['Active partners', m.active, 'Status = Active', ''],
-    ['$0 spend (7 days)', m.stale ? '–' : m.zero.length, m.stale ? 'check skipped' : 'Spend L7 is 0 or blank', m.stale ? '' : m.zero.length ? 'bad' : 'good'],
-    ['At risk', m.stale ? '–' : m.risk.length, 'no new ads in 14 days, nothing in the works', m.stale ? '' : m.risk.length ? 'bad' : 'good'],
-    ['Spend data synced', m.synced ? fmt(m.synced) : '–', m.stale ? 'more than ' + SPEND_STALE_DAYS + ' days old' : 'up to date', m.stale ? 'bad' : 'good']
-  ];
-  $('skpis').innerHTML = cards.map(function (c) { return '<div class="kpi ' + c[3] + '"><div class="l">' + c[0] + '</div><div class="v">' + c[1] + '</div><div class="pnote">' + c[2] + '</div></div>'; }).join('');
-  $('ssub').textContent = 'Checked ' + fmt(m.today) + ' · sorted by tier · first reason that applies';
-  var h = '';
-  if (m.stale) h = '<div class="bnote">⚠️ Partner spend data hasn\'t synced since ' + (m.synced ? fmt(m.synced) : 'an unknown date') + ', so nobody is flagged.</div>';
-  else {
-    if (m.zero.length) {
-      h += '<div class="sphead" style="color:var(--text-danger)">🔴 $0 spend · ' + m.zero.length + '</div>';
-      h += m.zero.map(function (z) {
-        var r = z.r, link = r.sprint && r.sprint.url ? r.sprint : r.next;
-        return '<div class="sp"><div><div><span class="nm">' + esc(z.p.name) + '</span><span class="tier">' + esc(z.p.tier || 'No tier') + '</span></div>' +
-          '<div class="sub">Last spend ' + (z.p.lastSpend ? fmt(z.p.lastSpend) : 'never') + ' · <a href="' + esc(z.p.url) + '" target="_blank" rel="noopener">Partner ↗</a></div></div>' +
-          '<div class="why2"><div><b>Why:</b> ' + esc(r.why) + '</div><div class="sub"><b>Owner:</b> ' + esc(r.owner) +
-          (r.next && (!r.sprint || r.next.id !== r.sprint.id) ? ' · <b>Next up:</b> ' + esc(r.next.name.trim()) + ' (' + esc(r.next.status) + ')' : '') +
-          (link && link.url ? ' · <a href="' + esc(link.url) + '" target="_blank" rel="noopener">' + (r.link || 'View sprint') + ': ' + esc(String(link.name || '').trim()) + ' ↗</a>' : '') + '</div></div></div>';
-      }).join('');
-    }
-    if (m.risk.length) {
-      h += '<div class="sphead" style="color:var(--warn)">🟡 At risk · ' + m.risk.length + '</div>';
-      h += m.risk.map(function (x) {
-        return '<div class="sp"><div><span class="nm">' + esc(x.p.name) + '</span><span class="tier">' + esc(x.p.tier || 'No tier') + '</span></div>' +
-          '<div class="sub">No new ads in 14 days and nothing ready, in review or in production · ' + esc(x.p.cs.length ? x.p.cs.map(function (n) { return '@' + n; }).join(', ') : '@Partnerships') + '</div></div>';
-      }).join('');
-    }
-    if (!h) h = '<div class="pnote" style="padding:10px 0">Every active partner spent in the last 7 days and nobody is at risk. Nothing to post.</div>';
-  }
-  $('slist').innerHTML = h;
-  $('smsg').textContent = msg || 'Nothing flagged, nothing to post.';
-  $('copyspend').disabled = !msg;
-  $('copyspend').style.opacity = msg ? '' : '.5';
-}
-$('copyspend').addEventListener('click', function () {
-  var t = spendMessage(spendModel()), btn = $('copyspend'); if (!t) return;
-  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { btn.textContent = 'Copied'; }, function () { window.prompt('Copy the message:', t); })
-    .then(function () { setTimeout(function () { btn.textContent = 'Copy message'; }, 1500); });
-});
 
 // ---- Status overview (Timeline tab) --------------------------------------
 // Snapshot as of the latest weekly report (refreshes every Wednesday); "Needs your attention now" is checked live.
@@ -1366,7 +1004,7 @@ function overviewModel() {
     whoFor(x, j).split(', ').forEach(function (n) { if (n !== 'CS' && n !== 'Editor') people[n] = (people[n] || 0) + 1; });
   });
   Object.keys(people).forEach(function (n) { if (people[n] > WIP_LIMIT) wipOver.push(n + ' (' + people[n] + ')'); });
-  var tips = { pt: 'Send partners a reminder on day 7 of filming and escalate on day ' + FILMING_LIMIT + '. Put the Footage Due Date in the brief itself so it\'s agreed upfront.',
+  var tips = { pt: 'Send partners a reminder on day 7 of filming and escalate on day ' + FILMING_LIMIT + '. Put the ' + FILMING_LIMIT + '-day footage deadline in the brief itself so it\'s agreed upfront.',
     rv: 'Give CS a daily footage-review slot, and hand a review to a backup reviewer once it passes ' + FOOTAGE_REVIEW_LIMIT + ' days.',
     cs: 'Start briefing earlier in the month, or move briefs off whoever has the most open' + (wipOver.length ? ' (over the limit now: ' + wipOver.join(', ') + ')' : '') + '.',
     mc: 'Have CS draft the edit brief when footage is approved so production can start at handoff, and cap how many sprints each editor holds at once.',
@@ -1401,71 +1039,6 @@ function overviewModel() {
   return { r: r, prev: prev, box: box, now: now, asOf: r.end, wed: r.wed };
 }
 
-var OV_ALL = false;
-function renderOverview() {
-  if (!ALL.length) return;
-  var m = overviewModel();
-  $('ovsub').textContent = 'Snapshot for the report dated Wed ' + fmt(m.wed) + ' (as of ' + fmt(m.asOf) + ') · a new one every Wednesday. "Needs your attention now" is checked live.';
-  var h = m.box.map(function (b) {
-    return '<div class="ovbox"><h4>' + esc(b[0]) + '</h4><ul>' + (b[1].length ? b[1] : ['Nothing to report.']).map(function (l) { return '<li>' + esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</li>'; }).join('') + '</ul></div>';
-  }).join('');
-  var list = OV_ALL ? m.now : m.now.slice(0, 8);
-  h += '<div class="ovbox now"><h4>⚑ Needs your attention now · ' + m.now.length + '</h4>' + (m.now.length ? list.map(function (a) {
-    return '<div class="act" data-id="' + a.x.id + '"><span class="an" title="' + esc(a.x.name) + '">' + esc(a.x.name) + '</span><span class="aw">' + esc(STAGES[a.j][0]) + ' · chase ' + esc(whoFor(a.x, a.j)) + '</span><span class="ad" style="color:var(--text-danger)">' + esc(a.why) + '</span></div>';
-  }).join('') + (m.now.length > 8 ? '<button class="more" id="ovmore" type="button">' + (OV_ALL ? 'Show fewer' : 'Show all ' + m.now.length) + '</button>' : '') : '<div class="pnote">Nothing overdue right now.</div>') + '</div>';
-  $('overview').innerHTML = h;
-}
-function overviewText() {
-  var m = overviewModel();
-  var out = ['Partner pipeline · status overview · week of ' + fmt(m.r.start) + ' – ' + fmt(m.r.end)];
-  m.box.forEach(function (b) { out.push('', b[0]); b[1].forEach(function (l) { out.push('• ' + l.replace(/\*\*(.+?)\*\*/g, '$1')); }); });
-  out.push('', 'Needs attention now (' + m.now.length + ')');
-  m.now.forEach(function (a) { out.push('• ' + a.x.name.trim() + ': ' + STAGES[a.j][0] + ', chase ' + whoFor(a.x, a.j) + '. ' + a.why + '.'); });
-  return out.join('\n');
-}
-$('overview').addEventListener('click', function (e) {
-  if (e.target.id === 'ovmore') { OV_ALL = !OV_ALL; renderOverview(); return; }
-  var a = e.target.closest('.act'); if (!a) return;
-  setTab('timeline', true);
-  if (!VIEW.some(function (x) { return x.id === a.dataset.id; })) { $('range').value = ''; $('month').value = ''; $('product').value = ''; $('phase').value = ''; $('q').value = ''; applyFilters(); }
-  show(a.dataset.id);
-  var row = document.querySelector('.srow[data-id="' + a.dataset.id + '"]'); if (row) row.scrollIntoView({ block: 'nearest' });
-  $('title').scrollIntoView({ behavior: 'smooth', block: 'center' });
-});
-$('copyov').addEventListener('click', function () {
-  var t = overviewText(), btn = $('copyov');
-  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { btn.textContent = 'Copied'; }, function () { window.prompt('Copy the overview:', t); })
-    .then(function () { setTimeout(function () { btn.textContent = 'Copy overview'; }, 1500); });
-});
-
-// ---- Tabs & window --------------------------------------------------------
-var TAB = 'timeline', WINDOW_MONTHS = 6, DIRTY = {};
-var TABS = ['timeline', 'trends', 'deadlines', 'report', 'spend'];
-function setTab(t, push) {
-  if (TABS.indexOf(t) < 0) t = 'timeline';
-  TAB = t;
-  document.querySelectorAll('#tabs button').forEach(function (b) { var on = b.dataset.tab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-  TABS.forEach(function (k) { $('tab-' + k).hidden = k !== t; });
-  if (push) { try { history.replaceState(null, '', '#' + t); } catch (e) {} }
-  tip.style.display = 'none';
-  renderTab(t);
-}
-function renderTab(t) {
-  if (!ALL.length || !DIRTY[t]) return;
-  DIRTY[t] = false;
-  if (t === 'trends') renderTrends();
-  if (t === 'deadlines') renderDeadlines();
-}
-function markDirty() { DIRTY.trends = DIRTY.deadlines = true; renderTab(TAB); }
-$('tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setTab(b.dataset.tab, true); });
-document.querySelectorAll('[data-window]').forEach(function (el) {
-  el.innerHTML = [3, 6, 12].map(function (n) { return '<button type="button" data-n="' + n + '">Last ' + n + ' months</button>'; }).join('');
-  el.addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    WINDOW_MONTHS = +b.dataset.n; paintWindow(); markDirty();
-  });
-});
-function paintWindow() { document.querySelectorAll('[data-window] button').forEach(function (b) { b.classList.toggle('on', +b.dataset.n === WINDOW_MONTHS); }); }
 
 // Month buckets ending with the current month: [{key:'2026-09', label:'Sep'}, ...]
 function monthBuckets(n) {
@@ -1493,212 +1066,19 @@ function baseOpts(fmtY, extra) {
   var o = {
     responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
     interaction: { mode: 'index', intersect: false },
-    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1A1A1A', borderColor: 'rgba(255,86,0,.6)', borderWidth: 1, titleColor: '#F5E8D7', bodyColor: '#F5E8D7', footerColor: '#B3A897', padding: 10, cornerRadius: 6, displayColors: true, boxPadding: 4 } },
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2A2623', borderColor: '#2A2623', borderWidth: 0, titleColor: '#F3EEE8', bodyColor: '#F3EEE8', footerColor: '#A8A098', padding: 10, cornerRadius: 6, displayColors: true, boxPadding: 4 } },
     scales: {
-      x: { grid: { display: false }, border: { color: '#333' }, ticks: { color: '#888', font: { size: 11 }, autoSkip: false, maxRotation: 0 } },
-      y: { grid: { color: '#2C2C2C' }, border: { display: false }, ticks: { color: '#888', font: { size: 11 }, callback: fmtY, maxTicksLimit: 6 }, beginAtZero: true }
+      x: { grid: { display: false }, border: { color: '#2E2A27' }, ticks: { color: '#A8A098', font: { size: 11 }, autoSkip: false, maxRotation: 0 } },
+      y: { grid: { color: '#2E2A27' }, border: { display: false }, ticks: { color: '#A8A098', font: { size: 11 }, callback: fmtY, maxTicksLimit: 6 }, beginAtZero: true }
     }
   };
   return Object.assign(o, extra || {});
 }
 if (window.Chart) Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
 
-// ---- Trends tab -----------------------------------------------------------
-function launchedItems() { return ALL.filter(function (x) { return x.s.launched && x.mct && x.mct.d.launch; }); }
-function stageFinish(x, j) {
-  var sp = x.s.spans[j]; if (!sp.length || x.s.current === j) return null;
-  return sp[sp.length - 1][1];
-}
-function renderTrends() {
-  var M = monthBuckets(WINDOW_MONTHS), groups = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
-  var pbl = groups.map(function (g) { return g.length ? avg(g.map(function (x) { return x.s.pbl; })) : null; });
-  var mct = groups.map(function (g) { return g.length ? avg(g.map(function (x) { return x.s.mct; })) : null; });
-  // Bar height = the official lead time for that month; split between the two libraries in proportion.
-  var tot = groups.map(function (g) { return g.length ? leadTime(g) : null; });
-  var rawP = pbl, rawM = mct;
-  pbl = tot.map(function (t, i) { return t == null ? null : t * rawP[i] / ((rawP[i] + rawM[i]) || 1); });
-  mct = tot.map(function (t, i) { return t == null ? null : t - pbl[i]; });
-  $('targetlbl').textContent = 'Target ' + TARGET_LEAD_DAYS + 'd';
-  document.querySelectorAll('.tgt').forEach(function (e) { e.textContent = TARGET_LEAD_DAYS + '-day'; });
-  chart('c-lead', {
-    type: 'bar',
-    data: { labels: M.map(function (m) { return m.label; }), datasets: [
-      { type: 'line', label: 'Target', data: M.map(function () { return TARGET_LEAD_DAYS; }), borderColor: '#888', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 0 },
-      { label: 'Partner Brief Library', data: pbl.map(r1n), backgroundColor: groups.map(function (g) { return g.length >= MIN_MONTH_SAMPLE ? '#FF5600' : 'rgba(255,86,0,.35)'; }), stack: 's', maxBarThickness: 36, order: 1 },
-      { label: 'Master Creative Tracker', data: mct.map(r1n), backgroundColor: groups.map(function (g) { return g.length >= MIN_MONTH_SAMPLE ? '#E9D5B7' : 'rgba(233,213,183,.35)'; }), stack: 's', maxBarThickness: 36, borderRadius: { topLeft: 4, topRight: 4 }, order: 1 }
-    ] },
-    options: baseOpts(function (v) { return v + 'd'; }, {
-      scales: Object.assign(baseOpts().scales, { x: Object.assign(baseOpts().scales.x, { stacked: true }), y: Object.assign(baseOpts(function (v) { return v + 'd'; }).scales.y, { stacked: true }) }),
-      plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
-        label: function (c) { return c.dataset.label + ': ' + (c.raw == null ? '–' : c.raw + 'd'); },
-        footer: function (items) { var i = items[0].dataIndex; return tot[i] == null ? 'No launches' : 'Lead time (' + LEAD_WORD + ') ' + r1(tot[i]) + 'd · ' + groups[i].length + ' launched' + (groups[i].length < MIN_MONTH_SAMPLE ? ' (too few to compare)' : ''); } } }) })
-    })
-  });
 
-  // Per-stage monthly averages, by the month each stage finished
-  var tiles = [];
-  STAGES.forEach(function (st, j) {
-    if (j === HOLD) return;
-    var g = byMonth(M, ALL.filter(function (x) { return stageFinish(x, j); }), function (x) { return stageFinish(x, j); });
-    var v = g.map(function (a) { return a.length ? avg(a.map(function (x) { return x.s.days[j]; })) : null; });
-    var solid = v.filter(function (x, i) { return x != null && g[i].length >= MIN_TILE_SAMPLE; });
-    if (!v.some(function (x) { return x != null; })) return;
-    var have = solid.length ? solid : v.filter(function (x) { return x != null; });
-    tiles.push({ j: j, v: v, first: have[0], last: have[have.length - 1], n: sum(g.map(function (a) { return a.length; })), thin: solid.length < 2 });
-  });
-  var slower = tiles.filter(function (t) { return !t.thin && t.last - t.first > 0.5; });
-
-  // Compare the latest and earliest months that have enough launches to mean something.
-  var ok = tot.map(function (x, i) { return x != null && groups[i].length >= MIN_MONTH_SAMPLE; });
-  var lastI = ok.lastIndexOf(true), firstI = ok.indexOf(true);
-  if (lastI < 0) { for (var i = tot.length - 1; i >= 0; i--) if (tot[i] != null) { lastI = firstI = i; break; } }
-  var kp = [];
-  if (lastI >= 0) {
-    var d = tot[lastI] - tot[firstI], better = d <= 0;
-    kp.push('<div class="kpi"><div class="l">' + LEAD_LABEL + ' · ' + M[lastI].label + '</div><div class="v">' + r1(tot[lastI]) + '<small>days</small></div><div class="pnote" style="color:' + (firstI === lastI ? 'var(--text-muted)' : better ? 'var(--good)' : 'var(--text-danger)') + '">' + (firstI === lastI ? groups[lastI].length + ' launched' : (better ? '▼ ' : '▲ +') + r1(d) + 'd vs ' + M[firstI].label) + '</div></div>');
-    var pct = firstI !== lastI && tot[firstI] ? Math.round((tot[lastI] - tot[firstI]) / tot[firstI] * 100) : null;
-    kp.push('<div class="kpi ' + (pct == null ? '' : pct <= 0 ? 'good' : 'bad') + '"><div class="l">Change since ' + M[firstI].label + '</div><div class="v">' + (pct == null ? '–' : (pct > 0 ? '+' : '') + pct + '%') + '</div><div class="pnote">' + WINDOW_MONTHS + '-month trend · ' + sum(groups.map(function (g) { return g.length; })) + ' launched</div></div>');
-  } else {
-    kp.push('<div class="kpi"><div class="l">Avg lead time</div><div class="v">–</div><div class="pnote">No launches in this window</div></div>', '<div class="kpi"><div class="l">Change</div><div class="v">–</div></div>');
-  }
-  kp.push('<div class="kpi ' + (slower.length ? 'bad' : 'good') + '"><div class="l">Stages getting slower</div><div class="v"' + (slower.length ? ' style="color:var(--text-danger)"' : '') + '>' + slower.length + '</div><div class="pnote">' + (slower.length ? slower.map(function (t) { return STAGES[t.j][0]; }).join(', ') : 'None slower than ' + M[0].label) + '</div></div>');
-  $('tkpis').innerHTML = kp.join('');
-
-  $('tiles').innerHTML = tiles.map(function (t) {
-    var d = t.last - t.first, bad = !t.thin && d > 0.5, good = !t.thin && d < -0.5;
-    var have = t.v.map(function (x, i) { return x == null ? null : [i, x]; }).filter(Boolean);
-    var mx = Math.max.apply(null, have.map(function (p) { return p[1]; })), mn = Math.min.apply(null, have.map(function (p) { return p[1]; }));
-    var W = 100, H = 26, step = t.v.length > 1 ? W / (t.v.length - 1) : 0;
-    var pts = have.map(function (p) { return (p[0] * step).toFixed(1) + ',' + (H - ((p[1] - mn) / ((mx - mn) || 1)) * (H - 4) - 2).toFixed(1); });
-    var col = bad ? '#EF4444' : '#FF5600', lp = pts[pts.length - 1].split(',');
-    var tipTxt = M.map(function (m, i) { return m.label + ': ' + (t.v[i] == null ? '–' : r1(t.v[i]) + 'd'); }).join('<br>');
-    return '<div class="tile' + (bad ? ' slow' : '') + '" data-tipx="' + esc('<b>' + STAGES[t.j][0] + '</b> · ' + STAGES[t.j][1] + '<div class="m">' + tipTxt + '</div><div class="m">' + t.n + ' finished in window</div>') + '">' +
-      '<div class="n"><span>' + STAGES[t.j][0] + '</span><span class="pill ' + stCls(t.j) + '">' + STAGES[t.j][1].split(' ')[0] + '</span></div>' +
-      '<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:6px;gap:6px"><div><span style="font-size:18px;font-weight:600">' + r1(t.last) + 'd</span> <span style="font-size:12px;color:' + (bad ? 'var(--text-danger)' : good ? 'var(--good)' : 'var(--text-muted)') + '">' + (t.thin ? 'too few' : (d > 0 ? '+' : '') + r1(d) + 'd') + '</span></div>' +
-      '<svg width="90" height="30" viewBox="-3 0 106 30" aria-hidden="true"><polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="3" fill="' + col + '"/></svg></div></div>';
-  }).join('') || '<div class="empty">No finished stages in this window.</div>';
-}
 function r1n(n) { return n == null ? null : Math.round(n * 10) / 10; }
 
-// ---- Deadlines & capacity tab ---------------------------------------------
-function hbar(name, val, max, color, label, tipx, limit) {
-  return '<div class="hb"' + (tipx ? ' data-tipx="' + esc(tipx) + '"' : '') + '><span class="nm" title="' + esc(name) + '">' + esc(name) + '</span><div class="tr">' +
-    (val > 0 ? '<div class="fl" style="width:' + Math.min(100, val / max * 100) + '%;background:' + color + '"></div>' : '') +
-    (limit != null ? '<div class="lim" style="left:' + (limit / max * 100) + '%"></div>' : '') + '</div><span class="v">' + label + '</span></div>';
-}
-function renderDeadlines() {
-  var M = monthBuckets(WINDOW_MONTHS), today = todayIso(), keys = M.map(function (m) { return m.key; });
-
-  // On-time rate: briefs with no ⚑, grouped by the month in the brief name
-  function briefMonthKey(x) {
-    var mi = MONTHS.indexOf(nameMonth(x.name) || x.month); if (mi < 0) return null;
-    var ref = x.d.briefingStart || x.d.created || x.createdTime, y = +ref.slice(0, 4), best = null;
-    [y - 1, y, y + 1].forEach(function (yy) { var k = yy + '-' + String(mi + 1).padStart(2, '0'); if (!best || Math.abs(dayNum(k + '-01') - dayNum(ref)) < Math.abs(dayNum(best + '-01') - dayNum(ref))) best = k; });
-    return best;
-  }
-  var og = byMonth(M, ALL.filter(function (x) { return x.s.reached.some(Boolean); }), briefMonthKey);
-  var rate = og.map(function (g) { return g.length ? Math.round(g.filter(function (x) { return !x.s.flags.late.length; }).length / g.length * 100) : null; });
-  chart('c-ontime', {
-    type: 'line',
-    data: { labels: M.map(function (m) { return m.label; }), datasets: [{ label: 'On time', data: rate, borderColor: '#FF5600', backgroundColor: 'rgba(255,86,0,.12)', fill: true, tension: .3, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: '#FF5600', spanGaps: true }] },
-    options: baseOpts(function (v) { return v + '%'; }, {
-      scales: Object.assign(baseOpts().scales, { y: Object.assign(baseOpts(function (v) { return v + '%'; }).scales.y, { min: 0, max: 100 }) }),
-      plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
-        label: function (c) { return c.raw == null ? 'No briefs' : c.raw + '% on time'; },
-        footer: function (it) { var g = og[it[0].dataIndex]; return g.length ? g.length + ' briefs · ' + g.filter(function (x) { return x.s.flags.late.length; }).length + ' flagged' : ''; } } }) })
-    })
-  });
-
-  // Footage lateness by partner, vs Footage Due Date (due in the window)
-  var from = keys[0] + '-01', per = {};
-  ALL.forEach(function (x) {
-    var due = x.d.footageDue; if (!due || due < from || due > today) return;
-    var got = x.d.footageReceived, late = dayNum(got || today) - dayNum(due);
-    if (!got && (late <= 0 || late > STALLED_DAYS)) return; // not due yet, or long-abandoned
-    var who = (x.partnerName || 'Unknown') + (ROSTER && !x.onRoster ? ' (not on roster)' : '');
-    (per[who] = per[who] || []).push({ late: late, x: x, open: !got });
-  });
-  var prs = Object.keys(per).map(function (k) { return { k: k, a: avg(per[k].map(function (r) { return r.late; })), n: per[k].length, rows: per[k] }; })
-    .sort(function (a, b) { return b.a - a.a; });
-  var pmax = Math.max(10, Math.max.apply(null, prs.map(function (p) { return p.a; }).concat([0])));
-  $('prnote').textContent = 'Average days after Footage Due Date, briefs due since ' + fmt(from) + ' · ' + prs.length + ' partners · top 15 · footage still missing ' + STALLED_DAYS + '+ days past due is left out';
-  $('pr').innerHTML = prs.slice(0, 15).map(function (p) {
-    var c = p.a >= 5 ? '#EF4444' : p.a > 0 ? '#EAB308' : '#22C55E';
-    var lbl = p.a <= 0 ? '<span style="color:var(--good)">on time</span>' : '<span style="color:' + (p.a >= 5 ? 'var(--text-danger)' : 'var(--warn)') + '">+' + r1(p.a) + 'd</span>';
-    var t = '<b>' + esc(p.k) + '</b><div class="m">' + p.rows.map(function (r) { return esc(r.x.name) + ': ' + (r.late > 0 ? '+' + r.late + 'd' : 'on time') + (r.open ? ' (not received)' : ''); }).join('<br>') + '</div>';
-    return hbar(p.k, p.a, pmax, c, lbl, t);
-  }).join('') || '<div class="empty">No footage due in this window.</div>';
-
-  // Open sprints per person, by who owns the stage each brief is sitting in
-  var cs = {}, ed = {};
-  ALL.forEach(function (x) {
-    var j = x.s.current; if (j == null || j === HOLD || !x.s.open) return;
-    if (x.s.days[j] > STALLED_DAYS) return;
-    var own = STAGES[j][2], inMct = j >= PBL_N, m = x.mct && !x.mct.missing ? x.mct : null;
-    var names = own === 'cs' ? ((inMct && m && m.cs && m.cs.length ? m.cs : x.cs) || []) : own === 'ed' ? ((m && m.editors) || []) : null;
-    if (!names) return;
-    var bucket = own === 'cs' ? cs : ed;
-    (names.length ? names : ['Unassigned']).forEach(function (n) { (bucket[n] = bucket[n] || []).push({ x: x, j: j }); });
-  });
-  function wip(bucket) {
-    var list = Object.keys(bucket).map(function (k) { return { k: k, rows: bucket[k] }; }).sort(function (a, b) { return b.rows.length - a.rows.length; });
-    var max = Math.max(WIP_LIMIT + 3, Math.max.apply(null, list.map(function (p) { return p.rows.length; }).concat([0])));
-    return list.map(function (p) {
-      var n = p.rows.length, over = n > WIP_LIMIT;
-      var t = '<b>' + esc(p.k) + '</b> · ' + n + ' open<div class="m">' + p.rows.map(function (r) { return esc(r.x.name) + ' · ' + STAGES[r.j][0] + ' ' + r.x.s.days[r.j] + 'd'; }).join('<br>') + '</div>';
-      return hbar(p.k, n, max, over ? '#EF4444' : '#FF5600', '<span' + (over ? ' style="color:var(--text-danger)"' : '') + '>' + n + '</span>', t, WIP_LIMIT);
-    }).join('') || '<div class="pnote" style="padding:8px 0">Nobody has open sprints right now.</div>';
-  }
-  $('wipnote').textContent = '· right now · dashed line = limit of ' + WIP_LIMIT + ' · briefs stuck ' + STALLED_DAYS + '+ days in one stage are left out';
-  $('wip-cs').innerHTML = wip(cs);
-  $('wip-ed').innerHTML = wip(ed);
-
-  // Throughput and lead time per asset, by launch month
-  var lg = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
-  var assets = lg.map(function (g) { return sum(g.map(function (x) { return +x.mct.assets || 0; })); });
-  chart('c-assets', {
-    type: 'bar',
-    data: { labels: M.map(function (m) { return m.label; }), datasets: [{ label: 'Assets', data: assets, backgroundColor: '#FF5600', borderRadius: 4, maxBarThickness: 28 }] },
-    options: baseOpts(function (v) { return v; }, { plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
-      label: function (c) { return c.raw + ' assets'; }, footer: function (it) { return lg[it[0].dataIndex].length + ' MCT items launched'; } } }) }) })
-  });
-}
-
-// ---- Tooltip --------------------------------------------------------------
-var tip = $('tip');
-function tipHtml(el) {
-  if (el.dataset.tipx) return el.dataset.tipx;
-  if (el.dataset.flag) {
-    var fx = ALL.filter(function (b) { return b.id === el.dataset.flag; })[0];
-    return '<b>Flagged</b><div class="m">' + fx.s.flags.late.join('<br>') + '</div>';
-  }
-  if (el.dataset.hand) return '<b>Handoff</b><div class="m">Complete in the Partner Brief Library creates the Master Creative Tracker item.</div>';
-  if (el.dataset.avg != null) {
-    var st = STAGES[+el.dataset.avg];
-    return '<b>' + st[0] + '</b> · ' + st[1] + '<div>' + (el.dataset.lbl || 'Average') + ' ' + el.dataset.v + ' days' + (+el.dataset.avg === 2 ? ' past the 1st' : '') + '</div><div class="m">Across ' + el.dataset.n + ' briefs · Notion status: ' + st[3] + '</div>';
-  }
-  var x = ALL.filter(function (b) { return b.id === el.dataset.b; })[0], j = +el.dataset.j, s = STAGES[j];
-  if (!x) return '';
-  var spans = x.s.spans[j].map(function (p) { return fmt(p[0]) + ' → ' + (x.s.current === j && p[1] === todayIso() ? 'today' : fmt(p[1])); }).join('<br>');
-  var d = x.s.days[j];
-  return '<b>' + s[0] + '</b> · ' + s[1] + '<div>' + (d === 0 ? 'Under 1 day' : d + (d === 1 ? ' day' : ' days')) + (x.s.current === j ? ' and counting' : '') + '</div>' +
-    '<div class="m">Status: ' + s[3] + '</div><div class="m">' + spans + '</div>' + stageNote(x.s.flags, j);
-}
-document.addEventListener('mousemove', function (e) {
-  var el = e.target.closest && e.target.closest('[data-j],[data-hand],[data-avg],[data-flag],[data-tipx]');
-  if (!el) { tip.style.display = 'none'; return; }
-  tip.innerHTML = tipHtml(el); tip.style.display = 'block';
-  var w = tip.offsetWidth, hgt = tip.offsetHeight, x = e.clientX + 14, y = e.clientY + 14;
-  if (x + w > innerWidth - 8) x = e.clientX - w - 14;
-  if (y + hgt > innerHeight - 8) y = e.clientY - hgt - 14;
-  tip.style.left = x + 'px'; tip.style.top = y + 'px';
-});
-document.addEventListener('scroll', function () { tip.style.display = 'none'; }, true);
-
-$('rows').addEventListener('click', function (e) { var r = e.target.closest('.srow'); if (r) show(r.dataset.id); });
-['q', 'range', 'month', 'product', 'phase', 'sort'].forEach(function (id) { $(id).addEventListener(id === 'q' ? 'input' : 'change', applyFilters); });
-
-// ---- Data -----------------------------------------------------------------
 function loadData() {
   var api = new URLSearchParams(location.search).get('api') || WORKER_URL;
   function get(q) {
@@ -1719,6 +1099,728 @@ function fillSelect(sel, values) {
 }
 
 var CACHE_KEY = 'partner-lead-times:v1';
+
+// ============================================================================
+// Presentation. Everything below reads ALL (roster applied) or BASE and never changes data.
+// ============================================================================
+
+// ---- Small helpers --------------------------------------------------------
+function info(text) { return '<button type="button" class="info" aria-label="How to read this" data-tipx="' + esc(text) + '">i</button>'; }
+function setInfo(id, text) { var el = $(id); if (el) el.innerHTML = info(text); }
+function briefLabel(n) { return String(n || '').replace(/\s*-\s*$/, '').replace(/\s+[-–]\s*|\s*[-–]\s+/g, ' · ').replace(/\s+/g, ' ').trim(); }
+function dd(n) { return n == null ? '–' : r1(n) + 'd'; }
+function daysTxt(n) { return n + (n === 1 ? ' day' : ' days'); }
+function phaseOf(j) { return j == null || j === HOLD ? null : PHASES[STAGE_PHASE[j]]; }
+function phaseDays(s, i) { return sum(PHASES[i].stages.map(function (j) { return s.days[j]; })); }
+function phaseReached(s, i) { return PHASES[i].stages.some(function (j) { return s.reached[j]; }); }
+function phaseFlag(s, i) { return PHASES[i].stages.some(function (j) { return s.flags.byStage[j]; }); }
+function phaseDone(s, i) { return phaseReached(s, i) && !(s.current != null && STAGE_PHASE[s.current] === i && s.open); }
+function nowLabel(x) {
+  var s = x.s;
+  if (s.launched) return 'Launched';
+  if (s.current === HOLD || s.phase === 'hold') return 'On hold';
+  if (s.current == null) return s.reached.some(Boolean) ? 'Closed' : 'Not started';
+  return phaseOf(s.current).name + ' · ' + STAGES[s.current][1];
+}
+function copyText(btn, text, label) {
+  if (!text) return;
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { btn.textContent = 'Copied'; }, function () { window.prompt('Copy this:', text); })
+    .then(function () { setTimeout(function () { btn.textContent = label; }, 1500); });
+}
+// Stage days as the deadline counts them, with its limit (null when the stage has no limit).
+function stageLimitText(x, j) {
+  var lim = stageLimit(j);
+  if (!lim) return null;
+  return (j === 4 ? limitDays(x.s, j) + REVIEW_UNIT : daysTxt(limitDays(x.s, j))) + ' (limit ' + lim + ')';
+}
+
+// ---- Tabs -----------------------------------------------------------------
+var TABS = ['today', 'briefs', 'trends', 'partners', 'report'];
+var TAB = 'today', WINDOW_MONTHS = 6, DIRTY = {};
+function setTab(t, push) {
+  if (TABS.indexOf(t) < 0) t = 'today';
+  TAB = t;
+  TABS.forEach(function (k) {
+    $('tab-' + k).hidden = k !== t;
+    var b = $('tab-btn-' + k); b.setAttribute('aria-selected', k === t); b.tabIndex = k === t ? 0 : -1;
+  });
+  $('windowctl').hidden = !(t === 'trends' || t === 'partners');
+  $('weekctl').hidden = t !== 'report';
+  if (push) { try { history.replaceState(null, '', '#' + t); } catch (e) {} }
+  tip.style.display = 'none';
+  renderTab(t);
+}
+function renderTab(t) {
+  if (!ALL.length || !DIRTY[t]) return;
+  DIRTY[t] = false;
+  ({ today: renderToday, briefs: renderBriefs, trends: renderTrends, partners: renderPartners, report: renderReport })[t]();
+}
+function markDirty() { REPORT_CACHE = {}; TABS.forEach(function (k) { DIRTY[k] = true; }); renderTab(TAB); }
+$('tabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab, true); });
+$('tabs').addEventListener('keydown', function (e) {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  var i = TABS.indexOf(TAB) + (e.key === 'ArrowRight' ? 1 : -1);
+  i = (i + TABS.length) % TABS.length; setTab(TABS[i], true); $('tab-btn-' + TABS[i]).focus();
+});
+$('windowctl').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  WINDOW_MONTHS = +b.dataset.n; paintWindow(); DIRTY.trends = DIRTY.partners = true; renderTab(TAB);
+});
+function paintWindow() { document.querySelectorAll('#windowctl button').forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.n === WINDOW_MONTHS); }); }
+
+// ---- TODAY ----------------------------------------------------------------
+var CHASE_COLS = [
+  { key: 'cs', name: 'Creative strategists', color: '#5B8DEF' },
+  { key: 'ed', name: 'Editors', color: '#2FA66A' },
+  { key: 'gr', name: 'Growth', color: '#B48CF2' },
+  { key: 'pt', name: 'Partners', color: '#F2C94C' }
+];
+function chaseCol(j) { var o = STAGES[j][2]; return o === 'ed' ? 'ed' : o === 'gr' ? 'gr' : (o === 'pt' || o === 'pa') ? 'pt' : 'cs'; }
+// Open briefs that are past a limit right now, longest overdue first. Stalled briefs are left out.
+function chaseItems(list) {
+  var out = [];
+  list.forEach(function (x) {
+    var s = x.s, j = s.current;
+    if (j == null || j === HOLD || !s.open || s.days[j] > STALLED_DAYS) return;
+    var lim = stageLimit(j), msg = null, over = 0, limit = 1;
+    if (s.flags.byStage[j]) {
+      if (lim) {
+        over = limitDays(s, j) - lim; limit = lim;
+        msg = j === 3 ? daysTxt(s.days[j]) + ' since the brief was sent, footage due in ' + FILMING_LIMIT
+          : over + (j === 4 ? (over === 1 ? REVIEW_UNIT.replace('days', 'day') : REVIEW_UNIT) : over === 1 ? ' day' : ' days') + ' over the ' + lim + (j === 4 ? '-business-day' : '-day') + ' limit';
+      } else { msg = s.flags.byStage[j][0]; over = s.days[j]; limit = Math.max(1, s.days[j]); }
+    } else if (j >= PBL_N && mctWork(s) > MCT_STUCK_LIMIT * 2) {
+      over = mctWork(s) - MCT_STUCK_LIMIT; limit = MCT_STUCK_LIMIT; msg = mctWork(s) + ' days in production';
+    }
+    if (msg) out.push({ x: x, j: j, over: over, severe: over > limit, msg: msg, col: chaseCol(j) });
+  });
+  return out.sort(function (a, b) { return b.over - a.over; });
+}
+var CHASE_ALL = false;
+function renderToday() {
+  var today = todayIso(), since = dayNum(today) - LEAD_TIME_TODAY_DAYS;
+  var launched = ALL.filter(function (x) { return x.s.launched && dayNum(x.mct.d.launch) >= since; });
+  var lt = leadTime(launched), items = chaseItems(ALL), sm = spendModel();
+  var scale = Math.max(lt || 0, TARGET_LEAD_DAYS) * 1.25;
+  var over = lt == null ? null : lt - TARGET_LEAD_DAYS;
+  var cards = [];
+  cards.push('<div class="big"><div class="l">' + LEAD_LABEL + '</div><div class="v">' + r1(lt) + '<small>days</small></div>' +
+    '<div class="meter" aria-hidden="true"><div class="f" style="width:' + ((lt || 0) / scale * 100) + '%"></div><div class="t" style="left:' + (TARGET_LEAD_DAYS / scale * 100) + '%"></div></div>' +
+    '<div class="s">' + (lt == null ? 'No launches' : over > 0 ? '<span class="bad">' + r1(over) + ' days over</span> the ' + TARGET_LEAD_DAYS + '-day target' : '<span class="good">On target</span> (' + TARGET_LEAD_DAYS + ' days)') +
+    ' · ' + launched.length + ' launched in the last ' + LEAD_TIME_TODAY_DAYS + ' days</div></div>');
+  cards.push('<div class="big"><div class="l">Past a deadline right now</div><div class="v">' + items.length + '<small>briefs</small></div><div class="s">Grouped below by who to chase</div></div>');
+  cards.push(sm.error ? '<div class="big"><div class="l">Partners at $0 spend, last 7 days</div><div class="v">–</div><div class="s">Spend data unavailable</div></div>'
+    : '<div class="big"><div class="l">Partners at $0 spend, last 7 days</div><div class="v">' + (sm.stale ? '–' : sm.zero.length) + '<small>of ' + sm.active + ' active</small></div><div class="s">' +
+      (sm.stale ? '<span class="warn">Spend data hasn\'t synced since ' + fmt(sm.synced) + '</span>' : 'Spend data synced ' + fmt(sm.synced)) + '</div></div>');
+  $('t-big').innerHTML = cards.join('');
+
+  setInfo('chase-info', 'Every open brief whose current step is past its limit: brief ready after its due date, sent after the 1st, footage more than ' + FILMING_LIMIT + ' days after the brief was sent, footage review over ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT + ', or more than ' + MCT_STUCK_LIMIT * 2 + ' days in production. Red = well past the limit, yellow = just past. Briefs stuck ' + STALLED_DAYS + '+ days in one step are left out.');
+  var html = CHASE_COLS.map(function (c) {
+    var list = items.filter(function (it) { return it.col === c.key; }), cardsH;
+    if (c.key === 'pt') {
+      // Partners: one card per partner.
+      var by = {};
+      list.forEach(function (it) { var k = it.x.partnerKey || it.x.id; (by[k] = by[k] || []).push(it); });
+      var groups = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b[0].over - a[0].over; });
+      cardsH = groups.slice(0, CHASE_ALL ? 999 : 5).map(function (g) {
+        var top = g[0], who = top.x.partnerName || 'Partner', late = g.some(function (it) { return it.j === 2; });
+        var meta = g.length > 1 ? g.length + ' briefs · ' + (late ? 'Partnerships' : 'Partnerships to chase') : STAGES[top.j][0] + ' · ' + (top.j === 2 ? 'Partnerships' : 'Partnerships to chase');
+        return '<a class="chase" href="' + esc(top.x.url) + '" target="_blank" rel="noopener"><b>' + esc(who) + notOnRosterTag(top.x) + '</b><span class="m">' + esc(meta) + '</span><span class="d ' + (top.severe ? 'bad' : 'warn') + '">' + esc(top.msg) + '</span></a>';
+      });
+      c.count = groups.length;
+    } else {
+      cardsH = list.slice(0, CHASE_ALL ? 999 : 5).map(function (it) {
+        return '<a class="chase" href="' + esc(it.x.url) + '" target="_blank" rel="noopener"><b>' + esc(briefLabel(it.x.name)) + notOnRosterTag(it.x) + '</b><span class="m">' + esc(STAGES[it.j][0] + ' · ' + whoFor(it.x, it.j)) + '</span><span class="d ' + (it.severe ? 'bad' : 'warn') + '">' + esc(it.msg) + '</span></a>';
+      });
+      c.count = list.length;
+    }
+    return '<div class="col"><div class="colh"><span><i class="swatch" style="background:' + c.color + '"></i> ' + c.name + '</span><span class="n">' + c.count + '</span></div>' +
+      (cardsH.length ? cardsH.join('') : '<div class="sub">Nothing overdue.</div>') + '</div>';
+  }).join('');
+  $('chase').innerHTML = html;
+  $('chase-all').textContent = CHASE_ALL ? 'Show fewer' : 'Show all ' + items.length + ' →';
+  $('chase-all').hidden = items.length <= 5;
+  var hiddenN = ROSTER_ONLY && ROSTER ? chaseItems(BASE.filter(function (b) { return !b.onRoster; })).length : 0;
+  $('chase-note').hidden = !hiddenN;
+  $('chase-note').textContent = hiddenN + ' overdue briefs from partners not on the current roster are hidden. Untick "Current roster only" to see them.';
+
+  // $0 spend
+  setInfo('spend-info', 'Active partners in the Partners Database whose Spend L7 is 0 or blank, with the first reason that applies from their sprints and briefs, and who owns it. "At risk" partners are still spending but have had no new ads in 14 days and nothing ready, in review or in production. Read-only: copy the message and post it yourself.');
+  var t = '';
+  if (sm.error) t = '<div class="error">Spend check unavailable: ' + esc(sm.error) + '. Check the integration is connected to the Partners Database.</div>';
+  else if (sm.stale) t = '<div class="empty">⚠️ Partner spend data hasn\'t synced since ' + (sm.synced ? fmt(sm.synced) : 'an unknown date') + ', so the spend check was skipped.</div>';
+  else if (!sm.zero.length && !sm.risk.length) t = '<div class="empty">Every active partner spent in the last 7 days and nobody is at risk. Nothing to post.</div>';
+  else {
+    t = '<table><thead><tr><th>Partner</th><th>Why</th><th>Owner</th></tr></thead><tbody>' + sm.zero.map(function (z) {
+      var link = z.r.sprint && z.r.sprint.url ? z.r.sprint : z.r.next;
+      return '<tr><td style="font-weight:600;white-space:nowrap">' + esc(z.p.name) + (z.p.tier ? '<span class="tag">' + esc(z.p.tier) + '</span>' : '') + '</td><td>' + esc(z.r.why) +
+        (link && link.url ? ' · <a href="' + esc(link.url) + '" target="_blank" rel="noopener">' + (z.r.link || 'View sprint') + ' ↗</a>' : '') + '</td><td style="white-space:nowrap">' + esc(z.r.owner.replace(/@/g, '')) + '</td></tr>';
+    }).join('') + sm.risk.map(function (x) {
+      return '<tr><td style="font-weight:600;white-space:nowrap">' + esc(x.p.name) + '<span class="tag" style="color:var(--yellow)">At risk</span></td><td>No new ads in 14 days and nothing ready, in review or in production</td><td style="white-space:nowrap">' + esc(x.p.cs.length ? x.p.cs.join(', ') : 'Partnerships') + '</td></tr>';
+    }).join('') + '</tbody></table>';
+  }
+  $('spendtable').innerHTML = t;
+  $('spend-sub').textContent = 'Active partners with no spend in the last 7 days, and why' + (sm.synced ? ' · spend data synced ' + fmt(sm.synced) : '') + '.';
+  var msg = spendMessage(sm);
+  $('copyspend').disabled = !msg;
+}
+$('chase-all').addEventListener('click', function () { CHASE_ALL = !CHASE_ALL; renderToday(); });
+$('copyspend').addEventListener('click', function () { copyText(this, spendMessage(spendModel()), 'Copy for #partnerships'); });
+
+// ---- BRIEFS ---------------------------------------------------------------
+var BR_MODE = 'phase', LATE_ONLY = false;
+function passesFilters(x) {
+  var q = $('q').value.trim().toLowerCase(), mo = $('month').value, pr = $('product').value;
+  if (q && (x.name + ' ' + (x.partnerName || '')).toLowerCase().indexOf(q) < 0) return false;
+  if (mo && x.month !== mo) return false;
+  if (pr && (x.product || []).indexOf(pr) < 0) return false;
+  if (LATE_ONLY && !x.s.flags.late.length) return false;
+  return true;
+}
+function applyFilters() {
+  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null;
+  VIEW = ALL.filter(function (x) { return (since == null || dayNum(x.d.created || x.createdTime) >= since) && passesFilters(x); });
+  VIEW.sort(function (a, b) { return (b.d.briefingStart || b.d.created || b.createdTime) < (a.d.briefingStart || a.d.created || a.createdTime) ? -1 : 1; });
+  DIRTY.briefs = true; renderTab('briefs');
+}
+['q', 'range', 'month', 'product'].forEach(function (id) { $(id).addEventListener(id === 'q' ? 'input' : 'change', function () { applyFilters(); }); });
+$('lateonly').addEventListener('click', function () { LATE_ONLY = !LATE_ONLY; this.setAttribute('aria-pressed', LATE_ONLY); applyFilters(); });
+['mode-phase', 'mode-steps'].forEach(function (id) {
+  $(id).addEventListener('click', function () { BR_MODE = this.dataset.mode; DIRTY.briefs = true; renderTab('briefs'); });
+});
+
+// Average days for a stage across finished stages in a list.
+function stageAvg(list, j, fn) {
+  var v = list.filter(function (x) { return x.s.reached[j] && x.s.current !== j; }).map(function (x) { return x.s.days[j]; });
+  return { v: v.length ? (fn || avg)(v) : null, n: v.length };
+}
+function segHtml(cls, days, max, tipx, breach, label) {
+  if (days <= 0 && !breach) return '';
+  return '<div class="' + cls + (breach ? ' breach' : '') + '" style="flex:0 0 ' + Math.max(days / max * 100, breach ? 1.2 : 0.4) + '%" data-tipx="' + esc(tipx) + '">' + (label != null ? label : days >= 2 ? r1(days) : '') + '</div>';
+}
+function stageTip(x, j) {
+  var S = STAGES[j], sp = x.s.spans[j].map(function (p) { return fmt(p[0]) + ' → ' + (x.s.current === j && p[1] === todayIso() ? 'today' : fmt(p[1])); }).join('<br>');
+  var fl = (x.s.flags.byStage[j] || []).map(function (m) { return '<div style="color:var(--red);margin-top:4px">' + esc(m) + '</div>'; }).join('');
+  return '<b>' + esc(S[0]) + '</b> · ' + esc(S[1]) + '<div>' + (x.s.days[j] === 0 ? 'Under 1 day' : daysTxt(x.s.days[j])) + (x.s.current === j ? ' and counting' : '') + '</div><div class="m">' + sp + '</div>' + fl;
+}
+function phaseTip(x, i) {
+  var ph = PHASES[i];
+  return '<b>' + ph.name + '</b> · ' + ph.owner + '<div>' + daysTxt(phaseDays(x.s, i)) + '</div><div class="m">' + ph.stages.filter(function (j) { return x.s.reached[j]; }).map(function (j) {
+    return esc(STAGES[j][0]) + ' ' + x.s.days[j] + 'd' + (x.s.flags.byStage[j] ? ' <span style="color:var(--red)">· ' + esc(x.s.flags.byStage[j][0]) + '</span>' : '');
+  }).join('<br>') + '</div>';
+}
+// One brief's bar: 5 phases (queue split out inside Editing) or all 17 steps.
+function briefBar(x, max, mode) {
+  var s = x.s, h = '';
+  if (mode === 'steps') {
+    for (var j = 0; j < STAGES.length; j++) if (s.reached[j]) h += segHtml(stCls(j), s.days[j], max, stageTip(x, j), !!s.flags.byStage[j]);
+    return h;
+  }
+  PHASES.forEach(function (ph, i) {
+    if (!phaseReached(s, i)) return;
+    var tot = phaseDays(s, i), br = phaseFlag(s, i);
+    if (ph.queue != null && s.days[ph.queue] > 0) {
+      var q = s.days[ph.queue];
+      h += segHtml('ph-edit ph-queue', q, max, stageTip(x, ph.queue), false);
+      if (tot - q > 0 || br) h += segHtml('ph-' + ph.key, tot - q, max, phaseTip(x, i), br);
+    } else h += segHtml('ph-' + ph.key, tot, max, phaseTip(x, i), br);
+  });
+  if (s.days[HOLD]) h += segHtml('ph-hold', s.days[HOLD], max, stageTip(x, HOLD), false);
+  return h;
+}
+function longestStep(x) {
+  var s = x.s, big = -1, bj = null;
+  s.days.forEach(function (v, k) { if (k !== HOLD && s.reached[k] && v > big) { big = v; bj = k; } });
+  // A broken limit wins over a longer step that's within its limit.
+  for (var j = 0; j < STAGES.length; j++) if (s.flags.byStage[j] && stageLimit(j) && s.days[j] >= big * 0.5) { bj = j; break; }
+  if (bj == null) return '–';
+  var lim = s.flags.byStage[bj] && stageLimit(bj);
+  return lim ? '<span class="bad">' + esc(STAGES[bj][0]) + ' ' + s.days[bj] + 'd (limit ' + lim + ')</span>' : esc(STAGES[bj][0]) + ' ' + s.days[bj] + 'd';
+}
+function renderBriefs() {
+  var range = $('range').value;
+  // The typical brief: average days in each phase across finished stages.
+  var ph = PHASES.map(function (p, i) {
+    var st = p.stages.map(function (j) { return stageAvg(VIEW, j); });
+    var avgSum = sum(st.map(function (x) { return x.v || 0; }));
+    var q = p.queue != null ? stageAvg(VIEW, p.queue).v || 0 : 0;
+    var med = median(VIEW.filter(function (x) { return phaseDone(x.s, i); }).map(function (x) { return phaseDays(x.s, i); }));
+    return { p: p, avg: avgSum, queue: q, med: med };
+  });
+  var total = sum(ph.map(function (x) { return x.avg; }));
+  var bar = ph.map(function (x) {
+    var t = '<b>' + x.p.name + '</b> · ' + x.p.owner + '<div>Average ' + r1(x.avg) + ' days · median ' + dd(x.med) + '</div>';
+    if (x.queue) return segHtml('ph-edit ph-queue', x.queue, total, '<b>Waiting in queue</b> · Editor<div>Average ' + r1(x.queue) + ' days</div>', false, r1(x.queue)) + segHtml('ph-' + x.p.key, x.avg - x.queue, total, t, false, r1(x.avg - x.queue));
+    return segHtml('ph-' + x.p.key, x.avg, total, t, false, r1(x.avg));
+  }).join('');
+  var stages = STAGES.map(function (S, j) { return { j: j, a: stageAvg(VIEW, j) }; }).filter(function (x) { return x.j !== HOLD && x.a.v != null; })
+    .sort(function (a, b) { return b.a.v - a.a.v; }).slice(0, 4);
+  $('typ-sub').textContent = VIEW.length + ' briefs started ' + (range ? 'in the last ' + range + ' days' : 'at any time') + ' · ' + VIEW.filter(function (x) { return x.s.open; }).length + ' still in progress';
+  setInfo('typ-info', 'Each segment is the average days a brief spends in that phase (finished steps only, briefs matching the filters). The number on the right adds the phases up: it describes a typical brief and isn\'t the official lead time, which is on the Today and Trends tabs. The median under each phase is the middle brief; when it\'s much lower than the average, a few slow briefs are pulling the average up.');
+  $('typical').innerHTML = VIEW.length ? '<div style="display:flex;align-items:center;gap:20px"><div class="bar tall" style="flex:1">' + bar + '</div>' +
+    '<div style="text-align:right;white-space:nowrap"><div style="font:700 36px/1 var(--f-head)">' + r1(total) + 'd</div><div class="sub">typical brief · target ' + TARGET_LEAD_DAYS + 'd</div></div></div>' +
+    '<div class="plegend">' + ph.map(function (x) {
+      return '<div><b><i class="swatch ph-' + x.p.key + '"></i>' + x.p.name + '</b>' + x.p.owner + ' · median ' + dd(x.med) + (x.queue ? ' · ' + r1(x.queue) + 'd of it waiting in queue' : '') + '</div>';
+    }).join('') + '</div>' +
+    '<div class="sec" style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px">Longest steps on average</div><div class="steps4">' + stages.map(function (x, i) {
+      var q = x.j === QUEUE_STAGE;
+      return '<div class="stepc' + (q ? ' q' : '') + '"><div class="k">' + (i + 1) + ' · ' + esc(STAGES[x.j][1]) + (q ? ' · waiting' : '') + '</div><div class="t">' + esc(STAGES[x.j][0]) + '</div><div class="v">' + r1(x.a.v) + 'd</div><div class="k">median ' + dd(stageAvg(VIEW, x.j, median).v) + ' · ' + x.a.n + ' briefs</div></div>';
+    }).join('') + '</div>' : '<div class="empty">No briefs match these filters.</div>';
+
+  // Every brief
+  $('mode-phase').setAttribute('aria-pressed', BR_MODE === 'phase');
+  $('mode-steps').setAttribute('aria-pressed', BR_MODE === 'steps');
+  setInfo('every-info', 'One row per brief. The bar shows days in each phase (or each of the 17 steps), scaled so the longest brief fills the column. Striped green is time waiting in the editor queue, grey is on hold. A red outline means that phase or step broke a deadline. Total is the brief\'s counted days from Briefing Start (to launch, or to today if it\'s still moving), holds excluded. Click a row for its breakdown.');
+  // Scale to the 90th percentile: the few longest briefs run to the edge instead of flattening every other bar.
+  var lens = VIEW.map(function (x) { return x.s.lead + x.s.days[HOLD]; }).sort(function (a, b) { return a - b; });
+  var max = Math.max(lens.length ? lens[Math.floor((lens.length - 1) * 0.9)] : 1, 10);
+  $('brtable').innerHTML = VIEW.length ? '<table><thead><tr><th>Brief</th><th style="width:38%">Days in each ' + (BR_MODE === 'steps' ? 'step' : 'phase') + '</th><th>Now</th><th>Longest step</th><th style="text-align:right">Total</th></tr></thead><tbody>' +
+    VIEW.map(function (x) {
+      var sub = [];
+      if (notOnRosterTag(x)) sub.push('Not on roster');
+      return '<tr class="row' + (x.id === SELECTED ? ' on' : '') + '" data-id="' + x.id + '" tabindex="0"><td class="bname">' + esc(briefLabel(x.name)) + (sub.length ? '<span class="m">' + sub.join(' · ') + '</span>' : '') + '</td>' +
+        '<td>' + (x.s.reached.some(Boolean) ? '<div class="bar">' + briefBar(x, max, BR_MODE) + '</div>' : '<span class="sub">Briefing not started</span>') + '</td>' +
+        '<td style="white-space:nowrap">' + esc(nowLabel(x)) + '</td><td>' + longestStep(x) + '</td><td style="text-align:right;font-weight:700;white-space:nowrap">' + x.s.lead + 'd</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty">No briefs match these filters.</div>';
+  if (SELECTED && VIEW.some(function (x) { return x.id === SELECTED; })) showBrief(SELECTED, false); else $('bd').hidden = true;
+}
+$('brtable').addEventListener('click', function (e) { var r = e.target.closest('tr.row'); if (r) showBrief(r.dataset.id, true); });
+$('brtable').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { var r = e.target.closest('tr.row'); if (r) { e.preventDefault(); showBrief(r.dataset.id, true); } } });
+
+var SHOW_STEPS = false;
+function phaseLine(x, i) {
+  var s = x.s, ph = PHASES[i], parts = [];
+  if (ph.queue != null && s.reached[ph.queue]) parts.push('<b>' + s.days[ph.queue] + 'd waiting in the editor queue</b>');
+  ph.stages.forEach(function (j) {
+    if (j === ph.queue || !s.reached[j]) return;
+    if (j === 2 && !s.days[2]) { parts.push('sent to the partner on time'); return; }
+    var lt = s.flags.byStage[j] ? stageLimitText(x, j) : null;
+    parts.push(STAGES[j][0].toLowerCase() + ' ' + s.days[j] + 'd' + (lt ? ' (limit ' + stageLimit(j) + ')' : ''));
+  });
+  if (!parts.length) return 'Not reached yet.';
+  var t = parts.join(', ');
+  return t.charAt(0).toUpperCase() + t.slice(1) + '.';
+}
+function showBrief(id, scroll) {
+  SELECTED = id;
+  document.querySelectorAll('#brtable tr.row').forEach(function (r) { r.classList.toggle('on', r.dataset.id === id); });
+  var x = ALL.filter(function (b) { return b.id === id; })[0]; if (!x) return;
+  var s = x.s, links = '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open brief ↗</a>' + (x.mct && x.mct.url ? ' &nbsp; <a href="' + esc(x.mct.url) + '" target="_blank" rel="noopener">Open MCT item ↗</a>' : '');
+  var cards = PHASES.map(function (ph, i) {
+    var br = phaseFlag(s, i);
+    return '<div class="pcard' + (br ? ' breach' : '') + '"><div class="h"><i class="swatch ph-' + ph.key + '"></i>' + ph.name + '</div><div class="v' + (br ? ' bad' : '') + '">' + (phaseReached(s, i) ? phaseDays(s, i) + 'd' : '–') + '</div><div class="t">' + phaseLine(x, i) + '</div></div>';
+  }).join('');
+  var steps = '';
+  if (SHOW_STEPS) {
+    var t = s.lead + s.days[HOLD] || 1, start = 0;
+    for (var j = 0; j < STAGES.length; j++) {
+      if (j === HOLD && !s.reached[HOLD]) continue;
+      if (j === 0) steps += '<div class="sec">Partner Brief Library</div>';
+      if (j === PBL_N) steps += '<div class="sec">Master Creative Tracker</div>';
+      var d = s.days[j], r = s.reached[j], fl = s.flags.byStage[j];
+      steps += '<div class="srow"' + (r ? ' data-tipx="' + esc(stageTip(x, j)) + '"' : '') + '><span style="' + (r ? '' : 'color:var(--faint)') + '">' + (fl ? '⚑ ' : '') + esc(STAGES[j][0]) + '</span><span class="sub">' + esc(STAGES[j][1]) + '</span>' +
+        '<div class="track">' + (r ? '<div class="' + stCls(j) + (fl ? ' breach' : '') + '" style="left:' + (start / t * 100) + '%;width:' + (d / t * 100) + '%"></div>' : '') + '</div><span style="text-align:right' + (fl ? ';color:var(--red);font-weight:700' : '') + '">' + (!r ? '–' : d === 0 ? '<1' : d) + '</span></div>';
+      start += d;
+    }
+  }
+  $('bd').innerHTML = '<div class="sh" style="margin:0"><h2>' + esc(briefLabel(x.name)) + notOnRosterTag(x) + '</h2><div>' + links + '</div></div>' +
+    '<p style="margin:6px 0 0;font-size:15px">' + esc(briefNote(x)).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</p>' +
+    '<div class="pcards">' + cards + '</div>' +
+    '<div style="margin-top:16px"><button type="button" class="linkbtn" id="toggle-steps" aria-expanded="' + SHOW_STEPS + '">' + (SHOW_STEPS ? 'Hide the 17 steps' : 'Show all 17 steps') + '</button></div>' +
+    (SHOW_STEPS ? '<div class="steplist">' + steps + '</div>' : '');
+  $('bd').hidden = false;
+  $('toggle-steps').addEventListener('click', function () { SHOW_STEPS = !SHOW_STEPS; showBrief(id, false); });
+  if (scroll) $('bd').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ---- TRENDS ---------------------------------------------------------------
+function launchedItems() { return ALL.filter(function (x) { return x.s.launched && x.mct && x.mct.d.launch; }); }
+function stageFinish(x, j) { var sp = x.s.spans[j]; if (!sp.length || x.s.current === j) return null; return sp[sp.length - 1][1]; }
+var labelPlugin = {
+  id: 'toplabels',
+  afterDatasetsDraw: function (c, args, opts) {
+    if (!opts || !opts.labels) return;
+    var ctx = c.ctx, meta = c.getDatasetMeta(opts.datasetIndex);
+    ctx.save(); ctx.fillStyle = '#F3EEE8'; ctx.font = '600 12px "DM Sans", system-ui, sans-serif'; ctx.textAlign = 'center';
+    meta.data.forEach(function (el, i) { var t = opts.labels[i]; if (t) ctx.fillText(t, el.x, el.y - 8); });
+    ctx.restore();
+  }
+};
+function renderTrends() {
+  var M = monthBuckets(WINDOW_MONTHS), groups = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
+  var tot = groups.map(function (g) { return g.length ? leadTime(g) : null; });
+  var libShare = groups.map(function (g) {
+    if (!g.length) return 0;
+    var a = avg(g.map(function (x) { return phaseDays(x.s, 0) + phaseDays(x.s, 1) + phaseDays(x.s, 2); })), b = avg(g.map(function (x) { return phaseDays(x.s, 3) + phaseDays(x.s, 4); }));
+    return a / ((a + b) || 1);
+  });
+  var lib = tot.map(function (t, i) { return t == null ? null : r1n(t * libShare[i]); });
+  var prod = tot.map(function (t, i) { return t == null ? null : r1n(t - t * libShare[i]); });
+  var ok = tot.map(function (t, i) { return t != null && groups[i].length >= MIN_MONTH_SAMPLE; });
+  var lastI = ok.lastIndexOf(true), firstI = ok.indexOf(true);
+
+  // Stage tiles: monthly average for each stage, by the month it finished.
+  var tiles = STAGES.map(function (S, j) {
+    if (j === HOLD) return null;
+    var g = byMonth(M, ALL.filter(function (x) { return stageFinish(x, j); }), function (x) { return stageFinish(x, j); });
+    var v = g.map(function (a) { return a.length ? avg(a.map(function (x) { return x.s.days[j]; })) : null; });
+    var solidI = v.map(function (x, i) { return x != null && g[i].length >= MIN_TILE_SAMPLE ? i : -1; }).filter(function (i) { return i >= 0; });
+    var have = v.filter(function (x) { return x != null; });
+    var last = solidI.length ? v[solidI[solidI.length - 1]] : have.length ? have[have.length - 1] : null;
+    var first = solidI.length ? v[solidI[0]] : null;
+    var thin = solidI.length < 2;
+    return { j: j, v: v, n: g.map(function (a) { return a.length; }), last: last, change: thin ? null : last - first, thin: thin };
+  });
+  var phaseStats = PHASES.map(function (ph, i) {
+    var ts = ph.stages.map(function (j) { return tiles[j]; });
+    var last = sum(ts.map(function (t) { return t.last || 0; }));
+    var chg = sum(ts.filter(function (t) { return t.change != null; }).map(function (t) { return t.change; }));
+    var driver = ts.filter(function (t) { return t.change != null; }).sort(function (a, b) { return b.change - a.change; })[0];
+    return { ph: ph, i: i, last: last, change: chg, driver: driver };
+  });
+  var slow = phaseStats.slice().sort(function (a, b) { return b.change - a.change; })[0];
+
+  var cards = [];
+  if (lastI >= 0) {
+    var d = firstI !== lastI ? tot[lastI] - tot[firstI] : null;
+    cards.push('<div class="big"><div class="l">' + LEAD_LABEL + ', ' + M[lastI].label + ' launches</div><div class="v">' + r1(tot[lastI]) + '<small>days</small></div><div class="s">' +
+      (d == null ? groups[lastI].length + ' launched' : '<span class="' + (d > 0 ? 'bad' : 'good') + '">' + r1(Math.abs(d)) + ' days ' + (d > 0 ? 'slower' : 'faster') + ' than ' + M[firstI].label + '</span>') + '</div></div>');
+  } else cards.push('<div class="big"><div class="l">' + LEAD_LABEL + '</div><div class="v">–</div><div class="s">Not enough launches in this window</div></div>');
+  cards.push('<div class="big"><div class="l">Briefs launched, last ' + WINDOW_MONTHS + ' months</div><div class="v">' + sum(groups.map(function (g) { return g.length; })) + '<small>briefs</small></div><div class="s">Target: ' + TARGET_LEAD_DAYS + ' days each</div></div>');
+  cards.push(slow && slow.change > 0.5 ? '<div class="big"><div class="l">Biggest slowdown</div><div class="v" style="font-size:36px">' + slow.ph.name + '</div><div class="s"><span class="bad">' +
+    (slow.driver ? esc(STAGES[slow.driver.j][0]) + ' up ' + r1(slow.driver.change) + ' days' : 'up ' + r1(slow.change) + ' days') + '</span> since ' + M[0].label + '</div></div>'
+    : '<div class="big"><div class="l">Biggest slowdown</div><div class="v" style="font-size:36px">None</div><div class="s">No phase is slower than at the start of the window</div></div>');
+  $('tr-big').innerHTML = cards.join('');
+
+  setInfo('lead-info', 'Each bar is the official lead time (' + LEAD_WORD + ' counted days from Briefing Start to launch, holds excluded) for briefs that launched that month. The bar is split between the Brief Library and production in proportion to the time spent in each. Faded bars had fewer than ' + MIN_MONTH_SAMPLE + ' launches, so they aren\'t used for comparisons.');
+  $('tgt-lbl').textContent = TARGET_LEAD_DAYS + '-day target';
+  var fade = function (base) { return groups.map(function (g) { return g.length >= MIN_MONTH_SAMPLE ? base : base + '55'; }); };
+  chart('c-lead', {
+    type: 'bar',
+    data: { labels: M.map(function (m) { return m.label; }), datasets: [
+      { type: 'line', label: 'Target', data: M.map(function () { return TARGET_LEAD_DAYS; }), borderColor: '#A8A098', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 0 },
+      { label: 'Brief Library', data: lib, backgroundColor: fade('#FF6A13'), stack: 's', maxBarThickness: 48, order: 1 },
+      { label: 'Production', data: prod, backgroundColor: fade('#E9D5B7'), stack: 's', maxBarThickness: 48, borderRadius: { topLeft: 6, topRight: 6 }, order: 1 }
+    ] },
+    plugins: [labelPlugin],
+    options: baseOpts(function (v) { return v + 'd'; }, {
+      layout: { padding: { top: 24 } },
+      scales: Object.assign(baseOpts().scales, { x: Object.assign(baseOpts().scales.x, { stacked: true }), y: Object.assign(baseOpts(function (v) { return v + 'd'; }).scales.y, { stacked: true }) }),
+      plugins: Object.assign(baseOpts().plugins, { toplabels: { datasetIndex: 2, labels: tot.map(function (t) { return t == null ? '' : Math.round(t) + 'd'; }) },
+        tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
+          label: function (c) { return c.datasetIndex === 0 ? 'Target ' + TARGET_LEAD_DAYS + 'd' : c.dataset.label + ': ' + (c.raw == null ? '–' : c.raw + 'd'); },
+          footer: function (it) { var i = it[0].dataIndex; return tot[i] == null ? 'No launches' : 'Lead time ' + r1(tot[i]) + 'd · ' + groups[i].length + ' launched' + (groups[i].length < MIN_MONTH_SAMPLE ? ' (too few to compare)' : ''); } } }) })
+    })
+  });
+  var thinMonths = M.filter(function (m, i) { return groups[i].length && groups[i].length < MIN_MONTH_SAMPLE; }).map(function (m) { return m.label; });
+  var noneMonths = M.filter(function (m, i) { return !groups[i].length; }).map(function (m) { return m.label; });
+  $('lead-note').textContent = (thinMonths.length ? thinMonths.join(', ') + ' faded: fewer than ' + MIN_MONTH_SAMPLE + ' launches. ' : '') + (noneMonths.length ? noneMonths.join(', ') + ' had none.' : '');
+
+  // Which step is slowing down?
+  setInfo('step-info', 'Left: each phase with its owner, the latest month\'s average (its steps added up) and the change since the start of the window. Right: every step in that phase. The big number is the latest month\'s average for briefs that finished the step; the change compares it with the first month that had at least ' + MIN_TILE_SAMPLE + ' finished. A red outline means the step is getting slower. Hover a tile for each month.');
+  $('phrows').innerHTML = phaseStats.map(function (p) {
+    var cls = p.change > 0.5 ? 'bad' : p.change < -0.5 ? 'good' : 'sub';
+    var left = '<div class="pcardL" style="--c:' + p.ph.color + '"><div style="font-weight:600">' + p.ph.name + '</div><div class="sub">' + p.ph.owner + '</div><div class="v">' + r1(p.last) + 'd</div><div class="' + cls + '" style="font-size:12px;font-weight:600">' +
+      (Math.abs(p.change) <= 0.5 ? 'no real change' : r1(Math.abs(p.change)) + 'd ' + (p.change > 0 ? 'slower' : 'faster')) + '</div></div>';
+    var right = '<div class="tiles">' + p.ph.stages.map(function (j) { return tileHtml(tiles[j], M); }).join('') + '</div>';
+    return '<div class="prow">' + left + right + '</div>';
+  }).join('');
+
+  // Workload
+  setInfo('wip-info', 'Open sprints each person is responsible for right now, based on the step each brief is in: CS from the CS people fields, editors from the MCT Designer field. The line is the limit of ' + WIP_LIMIT + '; bars at or over it turn red. Briefs stuck ' + STALLED_DAYS + '+ days in one step are left out. Hover a bar for the briefs.');
+  var cs = {}, ed = {};
+  ALL.forEach(function (x) {
+    var j = x.s.current; if (j == null || j === HOLD || !x.s.open || x.s.days[j] > STALLED_DAYS) return;
+    var own = STAGES[j][2], m = x.mct && !x.mct.missing ? x.mct : null;
+    var names = own === 'cs' ? ((j >= PBL_N && m && m.cs && m.cs.length ? m.cs : x.cs) || []) : own === 'ed' ? ((m && m.editors) || []) : null;
+    if (!names) return;
+    var bucket = own === 'cs' ? cs : ed;
+    (names.length ? names : ['Unassigned']).forEach(function (n) { (bucket[n] = bucket[n] || []).push({ x: x, j: j }); });
+  });
+  function wip(bucket) {
+    var list = Object.keys(bucket).map(function (k) { return { k: k, rows: bucket[k] }; }).sort(function (a, b) { return (a.k === 'Unassigned') - (b.k === 'Unassigned') || b.rows.length - a.rows.length; });
+    var max = Math.max(WIP_LIMIT + 3, Math.max.apply(null, list.map(function (p) { return p.rows.length; }).concat([0])));
+    return list.map(function (p) {
+      var n = p.rows.length, over = n >= WIP_LIMIT;
+      var t = '<b>' + esc(p.k) + '</b> · ' + n + ' open<div class="m">' + p.rows.map(function (r) { return esc(briefLabel(r.x.name)) + ' · ' + esc(STAGES[r.j][0]) + ' ' + r.x.s.days[r.j] + 'd'; }).join('<br>') + '</div>';
+      return '<div class="hb" data-tipx="' + esc(t) + '"><span>' + esc(p.k) + '</span><div class="tr"><div class="fl" style="width:' + (n / max * 100) + '%;background:' + (over ? '#FF7B6B' : '#FF6A13') + '"></div><div class="lim" style="left:' + (WIP_LIMIT / max * 100) + '%"></div></div><span class="v' + (over ? ' bad' : '') + '">' + n + '</span></div>';
+    }).join('') || '<div class="sub" style="padding:8px 0">Nobody has open sprints right now.</div>';
+  }
+  $('wip-sub').textContent = 'Open sprints per person right now. The line is the limit of ' + WIP_LIMIT + '.';
+  $('wip-cs').innerHTML = wip(cs); $('wip-ed').innerHTML = wip(ed);
+  var un = (ed.Unassigned || []).length + (cs.Unassigned || []).length;
+  $('wip-un').textContent = un ? un + (un === 1 ? ' sprint has' : ' sprints have') + ' no one assigned.' : '';
+
+  // Assets launched per month
+  setInfo('assets-info', 'How many finished assets shipped each month: the MCT Total Assets field on items launched that month. Hover for the number of MCT items.');
+  var lg = byMonth(M, launchedItems(), function (x) { return x.mct.d.launch; });
+  var assets = lg.map(function (g) { return sum(g.map(function (x) { return +x.mct.assets || 0; })); });
+  chart('c-assets', {
+    type: 'bar',
+    data: { labels: M.map(function (m) { return m.label; }), datasets: [{ label: 'Assets', data: assets, backgroundColor: '#FF6A13', borderRadius: 6, maxBarThickness: 40 }] },
+    options: baseOpts(function (v) { return v; }, { plugins: Object.assign(baseOpts().plugins, { tooltip: Object.assign(baseOpts().plugins.tooltip, { callbacks: {
+      label: function (c) { return c.raw + ' assets'; }, footer: function (it) { return lg[it[0].dataIndex].length + ' MCT items launched'; } } }) }) })
+  });
+}
+function tileHtml(t, M) {
+  var S = STAGES[t.j], bad = t.change != null && t.change > 0.5, good = t.change != null && t.change < -0.5;
+  var pts = t.v.map(function (x, i) { return x == null ? null : [i, x]; }).filter(Boolean);
+  var svg = '';
+  if (pts.length) {
+    var mx = Math.max.apply(null, pts.map(function (p) { return p[1]; })), mn = Math.min.apply(null, pts.map(function (p) { return p[1]; }));
+    var W = 100, H = 26, step = t.v.length > 1 ? W / (t.v.length - 1) : 0;
+    var xy = pts.map(function (p) { return [(p[0] * step), H - ((p[1] - mn) / ((mx - mn) || 1)) * (H - 4) - 2]; });
+    var col = bad ? '#FF7B6B' : '#FF6A13', l = xy[xy.length - 1];
+    svg = '<svg width="96" height="30" viewBox="-3 0 106 30" aria-hidden="true"><polyline points="' + xy.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="' + l[0].toFixed(1) + '" cy="' + l[1].toFixed(1) + '" r="3" fill="' + col + '"/></svg>';
+  }
+  var tip = '<b>' + esc(S[0]) + '</b> · ' + esc(S[1]) + '<div class="m">' + M.map(function (m, i) { return m.label + ': ' + (t.v[i] == null ? '–' : r1(t.v[i]) + 'd (' + t.n[i] + ')'); }).join('<br>') + '</div>';
+  return '<div class="tile' + (bad ? ' slow' : '') + (t.j === QUEUE_STAGE ? ' ph-queue-tile' : '') + '" data-tipx="' + esc(tip) + '"><div class="h"><span>' + (t.j === QUEUE_STAGE ? '<i class="swatch ph-queue"></i> ' : '') + esc(S[0]) + '</span><span>' + esc(S[1]) + '</span></div>' +
+    '<div class="b"><div><div class="v">' + (t.last == null ? '–' : r1(t.last) + 'd') + '</div><div class="c ' + (bad ? 'bad' : good ? 'good' : 'sub') + '">' +
+    (t.thin ? 'too few' : Math.abs(t.change) <= 0.05 ? 'no change' : (t.change > 0 ? '+' : '−') + r1(Math.abs(t.change)) + 'd') + '</div></div>' + svg + '</div></div>';
+}
+
+// ---- PARTNERS -------------------------------------------------------------
+var CHECK_STATUSES = ['Sent To Partner', 'Edits Requested'];
+// Footage on time? Late when received more than FILMING_LIMIT days after Brief Sent, or still with the partner after that.
+function footageCheck(b, today) {
+  var d = b.d, sent = d.briefSent, got = d.footageReceived;
+  if (!sent) return { k: 'cant', why: 'No Brief Sent Date' };
+  if (got && got < sent) return { k: 'cant', why: 'Footage Received is before Brief Sent' };
+  if (got) { var n = dayNum(got) - dayNum(sent); return { k: n > FILMING_LIMIT ? 'late' : 'ok', days: n }; }
+  var w = dayNum(today) - dayNum(sent);
+  if (CHECK_STATUSES.indexOf(b.status) >= 0) return w > FILMING_LIMIT ? { k: 'late', days: w, missing: true } : { k: 'pending', days: w };
+  return { k: 'cant', why: 'No Footage Received Date' };
+}
+function briefMonthKey(x) {
+  var mi = MONTHS.indexOf(x.month || nameMonth(x.name)); if (mi < 0) return null;
+  var ref = x.d.briefSent || x.d.briefingStart || x.d.created || x.createdTime, y = +ref.slice(0, 4), best = null;
+  [y - 1, y, y + 1].forEach(function (yy) { var k = yy + '-' + String(mi + 1).padStart(2, '0'); if (!best || Math.abs(dayNum(k + '-01') - dayNum(ref)) < Math.abs(dayNum(best + '-01') - dayNum(ref))) best = k; });
+  return best;
+}
+function partnerRows(M) {
+  var today = todayIso(), keys = M.map(function (m) { return m.key; }), rows = {};
+  function row(key, name, onRoster) { return rows[key] || (rows[key] = { key: key, name: name, onRoster: onRoster, cells: {}, briefs: [] }); }
+  if (ROSTER) Object.keys(ROSTER.byId).forEach(function (id) {
+    var p = ROSTER.byId[id], k = partnerKey(p.name);
+    if (EXCLUDED_TIERS.indexOf(p.tier) >= 0 || EXCLUDED_KEYS.indexOf(k) >= 0) return;
+    row(k, p.name, true);
+  });
+  ALL.forEach(function (b) {
+    var mk = briefMonthKey(b); if (!mk || keys.indexOf(mk) < 0 || !b.partnerKey) return;
+    if (ROSTER && ROSTER_ONLY && !b.onRoster) return;
+    var r = row(b.partnerKey, b.partnerName || b.partnerKey, b.onRoster), c = footageCheck(b, today);
+    var item = { b: b, c: c, month: mk };
+    r.briefs.push(item); (r.cells[mk] = r.cells[mk] || []).push(item);
+  });
+  return Object.keys(rows).map(function (k) {
+    var r = rows[k], checked = r.briefs.filter(function (i) { return i.c.k === 'ok' || i.c.k === 'late'; });
+    r.late = checked.filter(function (i) { return i.c.k === 'late'; }).length; r.checked = checked.length;
+    r.share = r.checked ? r.late / r.checked : -1;
+    return r;
+  }).sort(function (a, b) { return b.share - a.share || b.checked - a.checked || a.name.localeCompare(b.name); });
+}
+function renderPartners() {
+  var M = monthBuckets(WINDOW_MONTHS), rows = partnerRows(M), all = [];
+  rows.forEach(function (r) { all = all.concat(r.briefs); });
+  var byM = M.map(function (m) {
+    var items = all.filter(function (i) { return i.month === m.key; }), ok = items.filter(function (i) { return i.c.k === 'ok'; }).length, late = items.filter(function (i) { return i.c.k === 'late'; }).length;
+    return { m: m, ok: ok, late: late, n: ok + late };
+  });
+  var withData = byM.filter(function (x) { return x.n; }), last = withData[withData.length - 1], prev = withData[withData.length - 2];
+  var totOk = sum(byM.map(function (x) { return x.ok; })), totN = sum(byM.map(function (x) { return x.n; }));
+  var waiting = all.filter(function (i) { return i.c.k === 'late' && i.c.missing; });
+  var wNames = {}; waiting.forEach(function (i) { var n = i.b.partnerName || 'Unknown'; wNames[n] = (wNames[n] || 0) + 1; });
+  var pct = function (a, b) { return b ? Math.round(a / b * 100) : null; };
+  var cards = [];
+  if (last) {
+    var p1 = pct(last.ok, last.n), p0 = prev ? pct(prev.ok, prev.n) : null;
+    cards.push('<div class="big"><div class="l">On time in ' + last.m.label + '</div><div class="v">' + p1 + '%<small>' + last.ok + ' of ' + last.n + ' briefs</small></div><div class="s">' +
+      (p0 == null ? 'No earlier month to compare' : '<span class="' + (p1 >= p0 ? 'good' : 'bad') + '">' + (p1 === p0 ? 'Same as' : (p1 > p0 ? 'Up' : 'Down') + ' from ' + p0 + '% in') + ' ' + prev.m.label + '</span>') + '</div></div>');
+  } else cards.push('<div class="big"><div class="l">On time, latest month</div><div class="v">–</div><div class="s">No checked briefs in this window</div></div>');
+  cards.push('<div class="big"><div class="l">On time, ' + M[0].label + ' to ' + M[M.length - 1].label + '</div><div class="v">' + (totN ? pct(totOk, totN) + '%' : '–') + '<small>' + totOk + ' of ' + totN + ' briefs</small></div><div class="s">Limit: footage within ' + FILMING_LIMIT + ' days of the brief being sent</div></div>');
+  cards.push('<div class="big"><div class="l">Still waiting, past ' + FILMING_LIMIT + ' days</div><div class="v">' + waiting.length + '<small>briefs</small></div><div class="s">' + (waiting.length ? Object.keys(wNames).map(function (n) { return esc(n) + (wNames[n] > 1 ? ' ' + wNames[n] : ''); }).join(' · ') : 'Nobody is overdue') + '</div></div>');
+  $('pa-big').innerHTML = cards.join('');
+
+  document.querySelectorAll('#tab-partners .fl').forEach(function (e) { e.textContent = FILMING_LIMIT; });
+  setInfo('ot-info', 'Briefs grouped by their Brief Month. On time = footage received within ' + FILMING_LIMIT + ' days of Brief Sent. Late = received after that, or still with the partner (Sent To Partner / Edits Requested) more than ' + FILMING_LIMIT + ' days after it was sent. Briefs with a missing or wrong date aren\'t counted; they\'re listed under Data to fix. Footage Due Date isn\'t used.');
+  $('ot-sub').textContent = 'Briefs sent each month, and how many came back within ' + FILMING_LIMIT + ' days.';
+  var maxN = Math.max.apply(null, byM.map(function (x) { return x.n; }).concat([1]));
+  $('otbars').innerHTML = byM.map(function (x) {
+    var p = pct(x.ok, x.n), h = x.n / maxN * 100;
+    return '<div class="cbar"><div class="lab">' + (x.n ? '<b class="' + (p >= 50 ? 'good' : 'bad') + '">' + p + '%</b><span>' + x.ok + ' of ' + x.n + '</span>' : '<span>no briefs</span>') + '</div>' +
+      '<div class="stack" style="height:' + Math.max(x.n ? 6 : 0, x.n / maxN * 200) + 'px" data-tipx="' + esc('<b>' + x.m.label + '</b><div>' + x.ok + ' on time · ' + x.late + ' late or missing</div>') + '">' +
+      (x.late ? '<div style="flex:' + x.late + ';background:var(--red-sq)"></div>' : '') + (x.ok ? '<div style="flex:' + x.ok + ';background:var(--green)"></div>' : '') + '</div><div class="m">' + x.m.label + '</div></div>';
+  }).join('');
+
+  // Heatmap
+  setInfo('heat-info', 'One row per partner, one column per brief month. Green = all on time, red = all late, yellow = some late ("1/2" = 1 of 2 late), dark = no brief, striped = a brief whose dates are missing or wrong. The right column counts late briefs out of the ones that could be checked. Sorted worst first. Hover a square for each brief.');
+  $('heat-sub').textContent = 'Every ' + (ROSTER_ONLY ? 'active ' : '') + 'partner' + (EXCLUDED_TIERS.length ? ' except ' + EXCLUDED_TIERS.join(', ') : '') + '. Each square is that partner\'s briefs for the month.';
+  var h = '<table class="heat"><colgroup><col class="pn">' + M.map(function () { return '<col class="pm">'; }).join('') + '<col class="pt"></colgroup><thead><tr><th>Partner</th>' + M.map(function (m, i) { return '<th>' + m.label.toUpperCase() + (i === M.length - 1 ? ' · SO FAR' : '') + '</th>'; }).join('') + '<th style="text-align:right">Late, ' + M[0].label + '–' + M[M.length - 1].label + '</th></tr></thead><tbody>';
+  h += rows.map(function (r) {
+    return '<tr><td class="nm">' + esc(r.name) + (ROSTER && !r.onRoster ? '<span class="tag">Not on roster</span>' : '') + '</td>' + M.map(function (m) {
+      var items = r.cells[m.key] || [], checked = items.filter(function (i) { return i.c.k === 'ok' || i.c.k === 'late'; }), late = checked.filter(function (i) { return i.c.k === 'late'; }).length;
+      var cls = !items.length ? 'none' : !checked.length ? (items.some(function (i) { return i.c.k === 'cant'; }) ? 'cant' : 'none') : !late ? 'ok' : late === checked.length ? 'late' : 'mix';
+      var tipx = items.length ? '<b>' + esc(r.name) + ' · ' + m.label + '</b><div class="m">' + items.map(function (i) {
+        var d = i.b.d, c = i.c;
+        return esc(briefLabel(i.b.name)) + '<br>&nbsp;&nbsp;sent ' + (d.briefSent ? fmt(d.briefSent) : '–') + ', received ' + (d.footageReceived ? fmt(d.footageReceived) : c.missing ? 'not yet' : '–') +
+          (c.days != null ? ', ' + daysTxt(c.days) : '') + ' · <span style="color:' + (c.k === 'late' ? 'var(--red)' : c.k === 'ok' ? 'var(--green)' : 'var(--muted)') + '">' + (c.k === 'late' ? 'late' : c.k === 'ok' ? 'on time' : c.k === 'pending' ? 'with partner, not due yet' : "can't check: " + c.why.toLowerCase()) + '</span>';
+      }).join('<br>') + '</div>' : '';
+      return '<td><div class="cell ' + cls + '"' + (tipx ? ' data-tipx="' + esc(tipx) + '"' : '') + '>' + (cls === 'mix' ? late + '/' + checked.length : '') + '</div></td>';
+    }).join('') + '<td class="tot ' + (!r.checked ? 'sub' : r.late === 0 ? 'good' : r.share >= 0.5 ? 'bad' : 'warn') + '">' + (r.checked ? r.late + ' of ' + r.checked : 'none checked') + '</td></tr>';
+  }).join('') + '</tbody></table>';
+  $('heat').innerHTML = rows.length ? h : '<div class="empty">No partners to show.</div>';
+
+  // Data to fix
+  setInfo('fix-info', 'Briefs in this window that can\'t be checked for late footage: no Brief Sent Date, no Footage Received Date on a brief that has moved past the partner, or footage received before the brief was sent. Filling these in makes the on-time numbers complete.');
+  var cant = all.filter(function (i) { return i.c.k === 'cant'; }).sort(function (a, b) { return (a.b.partnerName || '').localeCompare(b.b.partnerName || ''); });
+  $('fixlist').innerHTML = cant.length ? cant.map(function (i) {
+    return '<div class="r"><a href="' + esc(i.b.url) + '" target="_blank" rel="noopener">' + esc(briefLabel(i.b.name)) + ' ↗</a><span class="sub">' + esc(i.c.why) + ' · ' + esc(i.b.status || '') + '</span></div>';
+  }).join('') : '<div class="sub">Nothing to fix: every brief in this window has the dates it needs.</div>';
+}
+
+// ---- WEEKLY REPORT --------------------------------------------------------
+var OPEN_LIST = {};
+function phasePacing(r) {
+  return PHASES.map(function (ph, i) {
+    var st = ph.stages.map(function (j) { return r.steps[j]; }).filter(function (x) { return x.now != null && x.prev != null; });
+    var now = st.length ? sum(st.map(function (x) { return x.now; })) : null, prev = st.length ? sum(st.map(function (x) { return x.prev; })) : null;
+    var there = r.active.filter(function (x) { return x.s.current != null && x.s.current !== HOLD && STAGE_PHASE[x.s.current] === i; }).length;
+    var driver = st.slice().sort(function (a, b) { return (b.now - b.prev) - (a.now - a.prev); })[0];
+    return { ph: ph, now: now, prev: prev, change: now == null ? null : now - prev, there: there, driver: driver };
+  });
+}
+function summaryBlocks(r, trend) {
+  function usual(k) { return avg(trend.map(function (t) { return typeof k === 'function' ? k(t) : t[k]; })); }
+  var pace = phasePacing(r), blocks = [];
+  // Headline
+  var u = usual('launched'), h1 = r.launched + ' partner creative' + (r.launched === 1 ? '' : 's') + ' launched (' + r.assets + ' assets)' +
+    (u == null ? '.' : Math.abs(r.launched - u) < 0.5 ? ', in line with the usual ' + r1(u) + ' a week.' : ', ' + (r.launched > u ? 'above' : 'below') + ' the usual ' + r1(u) + ' a week.');
+  var h2 = r.lead == null ? 'Nothing launched, so there is no lead time this week.' : 'Lead time was ' + r1(r.lead) + ' days from briefing to launch (' + LEAD_WORD + '), ' + (r.lead > TARGET_LEAD_DAYS ? r1(r.lead - TARGET_LEAD_DAYS) + ' days over' : 'within') + ' the ' + TARGET_LEAD_DAYS + '-day target.';
+  blocks.push(['Headline', [h1, h2]]);
+  // Where the time went
+  var ranked = pace.filter(function (p) { return p.now != null; }).sort(function (a, b) { return b.now - a.now; });
+  var w = [];
+  if (ranked[0]) {
+    var p = ranked[0], d = p.driver;
+    w.push(p.ph.name + ' is the slowest phase at ' + r1(p.now) + ' days' + (d ? ': ' + STAGES[d.j][0].toLowerCase() + ' took ' + r1(d.now) + ' days' + (Math.abs(d.now - d.prev) >= 0.5 ? ', ' + (d.now > d.prev ? 'up ' : 'down ') + r1(Math.abs(d.now - d.prev)) : '') : '') + '.');
+    var faster = pace.filter(function (x) { return x.change != null && x.change <= -0.5; }).map(function (x) { return x.ph.name; });
+    var second = ranked[1] ? ranked[1].ph.name + ' is next at ' + r1(ranked[1].now) + ' days' + (ranked[1].change != null && Math.abs(ranked[1].change) >= 0.5 ? ', ' + (ranked[1].change > 0 ? 'up ' : 'down ') + r1(Math.abs(ranked[1].change)) : '') : '';
+    w.push((second ? second + '. ' : '') + (faster.length ? faster.join(' and ') + ' got faster.' : 'No phase got faster.'));
+  } else w.push('Not enough finished steps to compare this week.');
+  blocks.push(['Where the time went', w]);
+  // Missed deadlines
+  var ms = [];
+  var M = [
+    ['pt', function (x) { return x.n === x.of ? 'Every partner footage delivery this week was late, ' + r1(x.avgOver) + ' days past the ' + FILMING_LIMIT + '-day limit on average.' : x.n + ' of ' + x.of + ' partner footage deliveries came in more than ' + FILMING_LIMIT + ' days after the brief was sent.'; }],
+    ['rv', function (x) { return x.n + ' of ' + x.of + ' footage reviews took longer than ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT + '.'; }],
+    ['cs', function (x) { return x.n + ' of ' + x.of + ' briefs were ready after their due date.'; }],
+    ['mc', function (x) { return x.n + ' of ' + x.of + ' launches spent more than ' + MCT_STUCK_LIMIT + ' days in production.'; }]
+  ].map(function (m) { return { k: m[0], x: r[m[0]], f: m[1] }; }).filter(function (m) { return m.x.n > 0; })
+    .sort(function (a, b) { return b.x.n / b.x.of - a.x.n / a.x.of || b.x.n - a.x.n; });
+  M.slice(0, 2).forEach(function (m) { ms.push(m.f(m.x)); });
+  if (!ms.length) ms.push('No deadlines were missed this week.');
+  blocks.push(['Missed deadlines', ms]);
+  // Focus for next week
+  var f = [], waitN = r.pt.open.filter(function (h) { return h.late <= STALLED_DAYS; }).length;
+  if (waitN) f.push('Chase partners for ' + waitN + ' brief' + (waitN === 1 ? '' : 's') + ' waiting on footage.');
+  var load = {};
+  r.active.forEach(function (x) { var j = x.s.current; if (j == null || j === HOLD || STAGES[j][2] === 'pt') return; load[j] = (load[j] || 0) + 1; });
+  var top = Object.keys(load).sort(function (a, b) { return load[b] - load[a]; })[0];
+  var rest = [];
+  if (top != null) rest.push('Clear the ' + load[top] + ' ' + (+top === QUEUE_STAGE ? 'briefs waiting in the editor queue' : STAGES[top][0].toLowerCase() + (load[top] === 1 ? '' : 's') + ' sitting with ' + STAGES[top][1]));
+  if (r.stalled) rest.push('archive ' + r.stalled + ' brief' + (r.stalled === 1 ? '' : 's') + ' stalled ' + STALLED_DAYS + '+ days');
+  if (rest.length) f.push(rest.map(function (t) { return t.charAt(0).toUpperCase() + t.slice(1); }).join('. ') + '.');
+  if (!f.length) f.push('Nothing urgent: keep the current pace.');
+  blocks.push(['Focus for next week', f.slice(0, 2)]);
+  return blocks;
+}
+function renderReport() {
+  if (!ALL.length) return;
+  var weds = reportWednesdays(), sel = $('week'), cur = sel.value;
+  sel.innerHTML = weds.slice(0, REPORT_WEEKS).map(function (w, i) {
+    var e = isoOf(dayNum(w) - 1), s0 = isoOf(dayNum(w) - 7);
+    return '<option value="' + w + '">' + (i === 0 ? 'Latest · ' : '') + 'Week of ' + fmt(s0) + ' – ' + fmt(e) + '</option>';
+  }).join('');
+  sel.value = weds.indexOf(cur) >= 0 && weds.indexOf(cur) < REPORT_WEEKS ? cur : weds[0];
+  var r = reportFor(sel.value), wi = weds.indexOf(sel.value), trend = weds.slice(wi, wi + TREND_WEEKS).map(reportFor);
+  $('rsub').textContent = 'Report for Wed ' + fmt(r.wed) + ' · covers Wed ' + fmt(r.start) + ' to Tue ' + fmt(r.end);
+  setInfo('sum-info', 'Written from the numbers below for the selected week, in phase language, two short sentences per block. "Usual" is the average of the last ' + TREND_WEEKS + ' weeks. Copy summary puts it on your clipboard as plain text.');
+  var blocks = summaryBlocks(r, trend);
+  $('summary').innerHTML = blocks.map(function (b) { return '<div><h4>' + esc(b[0]) + '</h4>' + b[1].map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>'; }).join('');
+
+  // Deadline cards
+  setInfo('dl-info', 'Each card counts the briefs checked this week and how many missed the limit. Partner footage uses the same rule as the Partners tab: more than ' + FILMING_LIMIT + ' days from Brief Sent. "Usually" is the ' + TREND_WEEKS + '-week average of misses; "still open now" counts briefs past the limit as of the report date.');
+  var defs = [['cs', 'Briefs ready late', 'CS · Brief Ready after Brief Due Date'], ['pt', 'Partner footage late', 'Partner · more than ' + FILMING_LIMIT + ' days after brief sent'],
+    ['rv', 'Footage review slow', 'CS · more than ' + FOOTAGE_REVIEW_LIMIT + REVIEW_UNIT + ' to review'], ['mc', 'Slow in production', 'Handoff to launch over ' + MCT_STUCK_LIMIT + ' days, holds excluded']];
+  $('rcards').innerHTML = defs.map(function (d) {
+    var x = r[d[0]], u = avg(trend.map(function (t) { return t[d[0]].n; })), open = x.open.filter(function (h) { return h.late <= STALLED_DAYS; }).length;
+    var list = OPEN_LIST[d[0]] ? '<div class="dlist">' + x.all.slice().sort(function (a, b) { return b.late - a.late; }).map(function (h) {
+      return '<a href="' + esc(h.x.b.url) + '" target="_blank" rel="noopener" class="' + (h.late > 0 ? 'miss' : '') + '"><span>' + esc(briefLabel(h.x.b.name)) + '</span><span>' + (h.late > 0 ? '+' + h.late + 'd' : 'on time') + '</span></a>';
+    }).join('') + '</div>' : '';
+    return '<div class="dcard"><h3>' + d[1] + '</h3><div class="t">' + esc(d[2]) + '</div><div class="v' + (x.n ? ' bad' : '') + '">' + x.n + '<small>of ' + x.of + ' missed</small></div>' +
+      '<div class="t" style="color:var(--text)">Usually ' + r1(u) + ' a week</div><div class="t" style="color:var(--text)">' + open + ' still open now</div>' +
+      (x.of ? '<button type="button" class="linkbtn" data-list="' + d[0] + '" aria-expanded="' + !!OPEN_LIST[d[0]] + '" style="align-self:flex-start;margin-top:6px">' + (OPEN_LIST[d[0]] ? 'Hide the briefs' : 'Show the ' + x.of + ' briefs') + '</button>' : '') + list + '</div>';
+  }).join('');
+
+  // Pacing
+  setInfo('pace-info', 'Average days in each phase for steps that finished in the last 4 weeks, compared with the 4 weeks before. A phase only adds up the steps that have values in both periods, so the comparison is like for like. "Briefs there now" is how many active briefs are sitting in that phase on the report date.');
+  var pace = phasePacing(r);
+  $('pace').innerHTML = '<table><thead><tr><th>Phase</th><th style="text-align:right">Last 4 weeks</th><th style="text-align:right">4 weeks before</th><th style="text-align:right">Change</th><th style="text-align:right">Briefs there now</th></tr></thead><tbody>' +
+    pace.map(function (p) {
+      var c = p.change;
+      return '<tr><td><i class="swatch ph-' + p.ph.key + '"></i> <b>' + p.ph.name + '</b> <span class="sub">' + p.ph.owner + '</span></td><td style="text-align:right;font-weight:600">' + dd(p.now) + '</td><td style="text-align:right">' + dd(p.prev) + '</td>' +
+        '<td style="text-align:right;font-weight:600" class="' + (c == null ? 'sub' : c > 0.05 ? 'bad' : c < -0.05 ? 'good' : 'sub') + '">' + (c == null ? '–' : Math.abs(c) < 0.05 ? 'no change' : r1(Math.abs(c)) + 'd ' + (c > 0 ? 'slower' : 'faster')) + '</td><td style="text-align:right">' + p.there + '</td></tr>';
+    }).join('') + '</tbody></table><p class="note">' + (r.onHold ? r.onHold + ' brief' + (r.onHold === 1 ? '' : 's') + ' on hold ' + (r.onHold === 1 ? 'is' : 'are') + ' not counted.' : 'No briefs on hold.') + '</p>';
+
+  // Status overview (weekly snapshot)
+  setInfo('ov-info', 'A written overview for the same week: where things stand, the stages holding the most work, the biggest problems ranked against the usual level, and a suggestion for each. The live list of overdue briefs is on the Today tab.');
+  var m = overviewModel();
+  $('ovsub').textContent = 'Snapshot as of ' + fmt(m.asOf) + ' · a new one every Wednesday';
+  $('overview').innerHTML = m.box.map(function (b) {
+    return '<div class="inner"><h4>' + esc(b[0]) + '</h4><ul>' + (b[1].length ? b[1] : ['Nothing to report.']).map(function (l) { return '<li>' + esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
+}
+function summaryPlain() {
+  var weds = reportWednesdays(), r = reportFor($('week').value), wi = weds.indexOf(r.wed), trend = weds.slice(wi, wi + TREND_WEEKS).map(reportFor);
+  var out = ['Partner content · weekly status · ' + fmt(r.start) + ' – ' + fmt(r.end)];
+  summaryBlocks(r, trend).forEach(function (b) { out.push('', b[0]); b[1].forEach(function (l) { out.push('• ' + l); }); });
+  return out.join('\n');
+}
+function overviewPlain() {
+  var m = overviewModel(), out = ['Partner pipeline · status overview · week of ' + fmt(m.r.start) + ' – ' + fmt(m.r.end)];
+  m.box.forEach(function (b) { out.push('', b[0]); b[1].forEach(function (l) { out.push('• ' + l.replace(/\*\*(.+?)\*\*/g, '$1')); }); });
+  return out.join('\n');
+}
+$('week').addEventListener('change', function () { DIRTY.report = true; renderTab('report'); });
+$('rcards').addEventListener('click', function (e) { var b = e.target.closest('[data-list]'); if (!b) return; OPEN_LIST[b.dataset.list] = !OPEN_LIST[b.dataset.list]; DIRTY.report = true; renderTab('report'); });
+$('copysum').addEventListener('click', function () { copyText(this, summaryPlain(), 'Copy summary'); });
+$('copyov').addEventListener('click', function () { copyText(this, overviewPlain(), 'Copy overview'); });
+
+// ---- Tooltip --------------------------------------------------------------
+var tip = $('tip');
+function placeTip(el, x, y) {
+  tip.innerHTML = el.dataset.tipx; tip.style.display = 'block';
+  var w = tip.offsetWidth, h = tip.offsetHeight, px = x + 14, py = y + 14;
+  if (px + w > innerWidth - 8) px = x - w - 14;
+  if (py + h > innerHeight - 8) py = y - h - 14;
+  tip.style.left = Math.max(8, px) + 'px'; tip.style.top = Math.max(8, py) + 'px';
+}
+document.addEventListener('mousemove', function (e) {
+  var el = e.target.closest && e.target.closest('[data-tipx]');
+  if (!el) { if (!tip.dataset.focus) tip.style.display = 'none'; return; }
+  placeTip(el, e.clientX, e.clientY);
+});
+document.addEventListener('focusin', function (e) {
+  var el = e.target.closest && e.target.closest('[data-tipx]');
+  if (!el) { tip.style.display = 'none'; delete tip.dataset.focus; return; }
+  var r = el.getBoundingClientRect(); tip.dataset.focus = '1'; placeTip(el, r.left, r.bottom);
+});
+document.addEventListener('focusout', function () { delete tip.dataset.focus; tip.style.display = 'none'; });
+document.addEventListener('scroll', function () { tip.style.display = 'none'; }, true);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tip.style.display = 'none'; });
+
+// ---- Data -----------------------------------------------------------------
+function rebuild() { buildAll(); applyFilters(); markDirty(); }
 function ingest(json, cached) {
   RAW = json.briefs || []; SPEND = json.spend || null;
   if (!cached) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch (e) {} }
@@ -1728,24 +1830,19 @@ function ingest(json, cached) {
   fillSelect($('month'), MONTHS.filter(function (m) { return months[m]; }));
   fillSelect($('product'), Object.keys(products).sort());
   var t = new Date(json.updated);
-  $('updated').textContent = (cached ? 'Last loaded ' : 'Live from Notion · updated ') + t.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) +
+  $('updated').textContent = (cached ? 'Last loaded ' : 'Live from Notion · updated ') + t.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) +
     (json.unresolvedMct ? ' · ' + json.unresolvedMct + ' linked MCT items could not be loaded' : '');
   applyFilters();
-  renderReport();
-  renderOverview();
-  renderSpend();
   markDirty();
 }
-
 var loading = false;
 function refresh() {
   if (loading) return; loading = true;
-  $('refresh').textContent = 'Refreshing…';
-  if (!ALL.length) $('rows').innerHTML = '<div class="loading">Loading live data from Notion…</div>';
+  $('refresh').textContent = '↻ Refreshing…';
   loadData().then(function (j) { ingest(j, false); }).catch(function (err) {
-    if (!ALL.length) $('rows').innerHTML = '<div class="error">Could not load data: ' + esc(err.message) + '</div>';
+    if (!ALL.length) $('t-big').innerHTML = '<div class="error">Could not load data: ' + esc(err.message) + '</div>';
     $('updated').textContent = 'Update failed: ' + err.message;
-  }).then(function () { loading = false; $('refresh').textContent = 'Refresh'; });
+  }).then(function () { loading = false; $('refresh').textContent = '↻ Refresh'; });
 }
 $('refresh').addEventListener('click', refresh);
 $('rosteronly').checked = ROSTER_ONLY;
@@ -1757,12 +1854,12 @@ $('rosteronly').addEventListener('change', function () {
 setInterval(function () { if (!document.hidden) refresh(); }, AUTO_REFRESH_MINUTES * 60e3);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && ALL.length) refresh(); });
 
-legend();
 paintWindow();
-setTab((location.hash || '').slice(1) || 'timeline', false);
+setTab((location.hash || '').slice(1) || 'today', false);
 // Paint the last snapshot immediately (per browser), then pull fresh data.
 try { var snap = localStorage.getItem(CACHE_KEY); if (snap) ingest(JSON.parse(snap), true); } catch (e) {}
 refresh();
+
 </script>
 </body>
 </html>
