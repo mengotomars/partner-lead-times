@@ -400,7 +400,7 @@ html.embed .fullpage{display:inline-flex}
 // Every threshold and option lives here. Change a value, commit, and the portal updates.
 // Paste your Cloudflare Worker URL here after deploying worker.js.
 var WORKER_URL = 'https://partner-lead-times.partnerships-4fc.workers.dev';
-var AUTO_REFRESH_MINUTES = 10;
+var AUTO_REFRESH_MINUTES = 30;     // automatic reload interval; the Refresh button always reloads straight away
 
 // Lead time: counted stage days from Briefing Start to Launch, holds excluded, for launched briefs.
 var LEAD_TIME_METRIC = 'median';   // 'median' | 'average', used for the lead-time number on every tab
@@ -1093,15 +1093,44 @@ function r1n(n) { return n == null ? null : Math.round(n * 10) / 10; }
 
 function loadData() {
   var api = new URLSearchParams(location.search).get('api') || WORKER_URL;
-  function get(q) {
-    if (window.LOAD_DATA_OVERRIDE) return window.LOAD_DATA_OVERRIDE(q);
-    return fetch(api + q, { cache: 'no-store' }).then(function (r) {
-      return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; });
+  var sep = api.indexOf('?') < 0 ? '?' : '&';
+  function once(q) {
+    if (window.LOAD_DATA_OVERRIDE) return window.LOAD_DATA_OVERRIDE(q ? '?' + q : '');
+    return fetch(api + (q ? sep + q : ''), { cache: 'no-store' }).then(function (r) {
+      return r.text().then(function (t) {
+        var j; try { j = JSON.parse(t); } catch (e) { throw new Error(r.ok ? 'Unreadable reply from the Worker' : 'Worker error ' + r.status + (/1102/.test(t) ? ' (CPU limit)' : '')); }
+        if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+        return j;
+      });
     });
   }
-  // Lead-time data and the spend check are separate Worker calls; a spend failure never blocks the dashboard.
-  return Promise.all([get(''), get((api.indexOf('?') < 0 ? '?' : '&') + 'part=spend').catch(function (e) { return { error: e.message }; })])
-    .then(function (res) { res[0].spend = res[1]; return res[0]; });
+  // One automatic retry per call: the free plan occasionally stops a busy call.
+  function get(q) { return once(q).catch(function () { return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return once(q); }); }); }
+  function pages(part) {
+    var out = [];
+    function next(cursor) {
+      return get('part=' + part + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '')).then(function (j) {
+        out = out.concat(j.items || []);
+        return j.next ? next(j.next) : out;
+      });
+    }
+    return next(null);
+  }
+  var spend = get('part=spend').catch(function (e) { return { error: e.message }; });
+  return Promise.all([pages('pbl'), pages('mct')]).then(function (res) {
+    var briefs = res[0], byId = {};
+    res[1].forEach(function (m) { byId[m.id] = m; });
+    var missing = briefs.map(function (b) { return b.mct; }).filter(function (id, i, a) { return id && !byId[id] && a.indexOf(id) === i; });
+    var chunks = [];
+    for (var i = 0; i < missing.length; i += 40) chunks.push(missing.slice(i, i + 40));
+    return Promise.all(chunks.map(function (c) { return get('part=mctids&ids=' + c.join(',')).catch(function () { return { items: [] }; }); })).then(function (more) {
+      more.forEach(function (j) { (j.items || []).forEach(function (m) { byId[m.id] = m; }); });
+      briefs.forEach(function (b) { b.mct = b.mct ? byId[b.mct] || { id: b.mct, missing: true } : null; });
+      return spend.then(function (sp) {
+        return { updated: new Date().toISOString(), briefs: briefs, spend: sp, unresolvedMct: briefs.filter(function (b) { return b.mct && b.mct.missing; }).length };
+      });
+    });
+  });
 }
 
 function fillSelect(sel, values) {
@@ -1859,9 +1888,10 @@ var loading = false;
 function refresh() {
   if (loading) return; loading = true;
   $('refresh').textContent = '↻ Refreshing…';
-  loadData().then(function (j) { ingest(j, false); }).catch(function (err) {
-    if (!ALL.length) $('t-big').innerHTML = '<div class="error">Could not load data: ' + esc(err.message) + '</div>';
-    $('updated').textContent = 'Update failed: ' + err.message;
+  loadData().then(function (j) { LAST_LOAD = Date.now(); ingest(j, false); }).catch(function (err) {
+    if (!ALL.length) { $('t-big').innerHTML = '<div class="error">Could not load data: ' + esc(err.message) + '. Click Refresh to try again.</div>'; return; }
+    var base = $('updated').textContent.replace(/ · Couldn't refresh.*$/, '');
+    $('updated').textContent = base + " · Couldn't refresh just now (" + err.message + '), showing the last data. Click Refresh to try again.';
   }).then(function () { loading = false; $('refresh').textContent = '↻ Refresh'; });
 }
 $('refresh').addEventListener('click', refresh);
@@ -1871,8 +1901,11 @@ $('rosteronly').addEventListener('change', function () {
   try { localStorage.setItem('plt:roster', ROSTER_ONLY ? '1' : '0'); } catch (e) {}
   if (RAW.length) rebuild();
 });
-setInterval(function () { if (!document.hidden) refresh(); }, AUTO_REFRESH_MINUTES * 60e3);
-document.addEventListener('visibilitychange', function () { if (!document.hidden && ALL.length) refresh(); });
+// Reload every AUTO_REFRESH_MINUTES while the page is visible, and when someone comes back to a page whose data is older than that.
+var LAST_LOAD = 0;
+function isStale() { return Date.now() - LAST_LOAD >= AUTO_REFRESH_MINUTES * 60e3; }
+setInterval(function () { if (!document.hidden && isStale()) refresh(); }, 60e3);
+document.addEventListener('visibilitychange', function () { if (!document.hidden && isStale()) refresh(); });
 
 paintWindow();
 setTab((location.hash || '').slice(1) || 'today', false);

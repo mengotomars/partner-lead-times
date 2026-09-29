@@ -188,12 +188,12 @@ Read-only access is enough.
 Type `/embed` in a Notion page, paste the Pages URL, and resize. After updating `index.html`, append `?v=2`, `?v=3`… to bust Notion's cache.
 
 ## Live updates
-The page reloads data from the Worker on open, every 10 minutes while visible, and on the Refresh button.
+The page reloads data from the Worker on open, every 30 minutes while visible (`AUTO_REFRESH_MINUTES`), when someone comes back to a page whose data is older than that, and whenever someone clicks Refresh. It loads in small pieces (`?part=pbl`, `?part=mct`, `?part=mctids`, `?part=spend`) so each Worker call stays under Cloudflare's free-plan CPU limit, retries a failed call once, and keeps showing the last good data if a refresh still fails.
 It also shows the last snapshot instantly while fresh data loads (stored in that viewer's browser).
 
 ## Notes
 - **Keep the token out of git.** It only lives in the Cloudflare secret. `.gitignore` blocks `.env` / `.dev.vars`.
 - The Worker URL is public: anyone who has it can read brief names, statuses and dates. Setting `ALLOWED_ORIGIN` stops other websites from reading it in a browser, but it won't stop direct requests.
-- The Worker makes about 15–25 Notion requests per load (free plan limit: 50). If Cloudflare returns
-  error 1102 (CPU limit exceeded) as the libraries grow, move to Workers Paid ($5/mo) or add KV caching.
+- Each Worker call reads at most one page of 100 items from Notion, which keeps it under the free plan's CPU
+  limit (error 1102). If that ever comes back as the libraries grow, Workers Paid ($5/mo) removes the limit.
 - You can test a different Worker without editing the file: `index.html?api=https://other-worker.workers.dev`.

@@ -56,9 +56,16 @@ export default {
     if (!env.NOTION_API_KEY) return json({ error: 'NOTION_API_KEY secret is not set on this Worker' }, 500, cors);
 
     try {
-      // ?part=spend runs the spend check on its own, so each call stays under the subrequest limit.
-      const part = new URL(request.url).searchParams.get('part');
-      const data = part === 'spend' ? await buildSpendOnly(env.NOTION_API_KEY) : await buildDataset(env.NOTION_API_KEY);
+      // The dashboard loads in small pieces so each call stays under the free plan's CPU and request limits:
+      //   ?part=pbl&cursor=...    one page (up to 100) of Partner Brief Library briefs
+      //   ?part=mct&cursor=...    one page of partner items from the Master Creative Tracker
+      //   ?part=mctids&ids=a,b  specific MCT items (up to 40) that the bulk pages missed
+      //   ?part=spend           the spend check
+      // With no part, everything in one call (can hit the free plan's CPU limit).
+      const params = new URL(request.url).searchParams, part = params.get('part');
+      const data = part === 'spend' ? await buildSpendOnly(env.NOTION_API_KEY)
+        : part ? await buildPart(env.NOTION_API_KEY, part, params)
+        : await buildDataset(env.NOTION_API_KEY);
       return json(data, 200, { ...cors, 'Cache-Control': 'public, max-age=120' });
     } catch (err) {
       return json({ error: err.message || String(err) }, 502, cors);
@@ -88,6 +95,48 @@ async function buildSpendOnly(key) {
   const notion = notionClient(key);
   const mctSchema = await notion('/databases/' + MCT_DB);
   return { updated: new Date().toISOString(), ...(await buildSpendCheck(notion, mctSchema)) };
+}
+
+const PBL_FILTER = { and: PBL_EXCLUDED.map((s) => ({ property: PBL_PROPS.status, status: { does_not_equal: s } })) };
+// Partner sprints in the MCT are Internal items titled "... Partner" or linked to a partner handle.
+const MCT_FILTER = {
+  and: [
+    { property: 'Source', select: { equals: 'Internal' } },
+    { or: [
+      { property: 'Concept', title: { contains: 'Partner' } },
+      { property: 'Partner IG Handle', relation: { is_not_empty: true } },
+    ] },
+  ],
+};
+// Which columns to ask Notion for, per database. Kept for 10 minutes while the Worker stays warm, so most
+// calls skip re-reading the (large) database schema.
+const QS_CACHE = {};
+async function columnsFor(notion, db, props) {
+  const c = QS_CACHE[db];
+  if (c && Date.now() - c.at < 10 * 60e3) return c.qs;
+  const qs = propFilter(await notion('/databases/' + db), props);
+  QS_CACHE[db] = { qs, at: Date.now() };
+  return qs;
+}
+const ID_RE = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+
+async function buildPart(key, part, params) {
+  const notion = notionClient(key);
+  if (part === 'pbl' || part === 'mct') {
+    const isPbl = part === 'pbl', db = isPbl ? PBL_DB : MCT_DB;
+    const qs = await columnsFor(notion, db, isPbl ? PBL_PROPS : MCT_PROPS);
+    const d = await notion('/databases/' + db + '/query?' + qs, {
+      filter: isPbl ? PBL_FILTER : MCT_FILTER, page_size: 100, start_cursor: params.get('cursor') || undefined,
+    });
+    return { items: d.results.map((p) => (isPbl ? readPage(p, PBL_PROPS) : readMct(p))), next: d.has_more ? d.next_cursor : null };
+  }
+  if (part === 'mctids') {
+    const ids = (params.get('ids') || '').split(',').filter((id) => ID_RE.test(id)).slice(0, 40);
+    const qs = await columnsFor(notion, MCT_DB, MCT_PROPS);
+    const pages = await pool(ids, 6, (id) => notion('/pages/' + id + '?' + qs).catch(() => null));
+    return { items: pages.filter(Boolean).map(readMct) };
+  }
+  throw new Error('Unknown part: ' + part);
 }
 
 async function buildDataset(key) {
