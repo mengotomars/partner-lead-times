@@ -325,6 +325,7 @@ html.embed .fullpage{display:inline-flex}
         <div style="display:flex;gap:10px;align-items:center"><button type="button" class="linkbtn" id="act-all" hidden></button><button type="button" class="btn" id="copyact">Copy action items</button></div>
       </div>
       <div class="card" style="padding:8px 24px 16px"><div class="tablewrap" id="actions"></div></div>
+      <p class="note" id="act-hidden" hidden></p>
     </section>
     <section id="bd" class="card" hidden></section>
   </section>
@@ -1510,6 +1511,15 @@ function renderActions() {
       '<td>' + esc(i.who) + '</td><td><i class="swatch ph-' + i.ph.key + '"></i> ' + esc(i.ph.name) + '<span class="why">' + esc(i.why) + '</span></td>' +
       '<td style="text-align:right;font-weight:700;white-space:nowrap;color:' + col[i.level] + '">' + i.days + 'd</td></tr>';
   }).join('') + '</tbody></table>' : '<div class="empty">Nothing to chase right now.</div>';
+  // Say how many stuck briefs the roster toggle is hiding, with the same filters applied.
+  var range = $('range').value, since = range ? dayNum(todayIso()) - +range : null;
+  var hiddenList = ROSTER_ONLY && ROSTER ? actionItems(BASE.filter(function (b) {
+    return !b.onRoster && (since == null || dayNum(b.d.created || b.createdTime) >= since) && passesFilters(b);
+  })) : [];
+  var hn = {}; hiddenList.forEach(function (i) { var n = i.x.partnerName || 'Unknown'; hn[n] = (hn[n] || 0) + 1; });
+  $('act-hidden').hidden = !hiddenList.length;
+  $('act-hidden').textContent = hiddenList.length + ' more stuck brief' + (hiddenList.length === 1 ? '' : 's') + ' from partners not Active in the Partners Database ' + (hiddenList.length === 1 ? 'is' : 'are') + ' hidden (' +
+    Object.keys(hn).map(function (n) { return n + (hn[n] > 1 ? ' ' + hn[n] : ''); }).join(', ') + '). Untick "Current roster only" to see them.';
   $('act-all').hidden = items.length <= 15;
   $('act-all').textContent = ACT_ALL ? 'Show fewer' : 'Show all ' + items.length;
 }
