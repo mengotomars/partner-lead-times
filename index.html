@@ -26,7 +26,7 @@ a{color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
 /* Phase colours (text on colour is always dark) */
-.ph-brief{background:#5B8DEF;color:#0F0D0B}.ph-film{background:#F2C94C;color:#0F0D0B}.ph-review{background:#F0A6C8;color:#0F0D0B}
+.ph-brief{background:#5B8DEF;color:#0F0D0B}.ph-film{background:#F2C94C;color:#0F0D0B}.ph-review{background:#F0A6C8;color:#0F0D0B}.ph-mbrief{background:#C75B9B;color:#0F0D0B}
 .ph-edit{background:#2FA66A;color:#0F0D0B}.ph-launch{background:#B48CF2;color:#0F0D0B}.ph-hold{background:#4A4541;color:#F3EEE8}
 .ph-queue{background:repeating-linear-gradient(135deg,#2FA66A 0 5px,#1F7A4C 5px 10px)}
 .breach{box-shadow:inset 0 0 0 2px var(--breach)}
@@ -112,7 +112,7 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
 .filters input[type=search]{flex:1 1 260px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:13px}
 .toggle{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer}
 .toggle[aria-pressed="true"]{border-color:var(--breach);color:var(--red)}
-.plegend{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px}
+.plegend{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:14px}
 .plegend div{font-size:12px;color:var(--muted);min-width:0}
 .steplegend{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
 .steplegend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:6px;align-items:center;color:var(--text);font-size:12px}
@@ -140,7 +140,7 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
 .acttable .why{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .acttable a.b{color:var(--text);text-decoration:none;font-weight:500}
 .acttable a.b:hover{color:var(--accent)}
-.pcards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}
+.pcards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:16px}
 .pcard{background:var(--card-2);border-radius:12px;padding:14px 16px;min-width:0}
 .pcard.breach{box-shadow:inset 0 0 0 2px var(--breach)}
 .pcard .h{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
@@ -317,7 +317,7 @@ html.embed .fullpage{display:inline-flex}
     <section>
       <div class="sh">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><h2>Every brief <span id="every-info"></span></h2>
-          <div class="seg" role="group" aria-label="Detail level"><button type="button" data-mode="phase" id="mode-phase">5 phases</button><button type="button" data-mode="steps" id="mode-steps">All 17 steps</button></div></div>
+          <div class="seg" role="group" aria-label="Detail level"><button type="button" data-mode="phase" id="mode-phase">6 phases</button><button type="button" data-mode="steps" id="mode-steps">All 17 steps</button></div></div>
         <div class="legend"><span><i class="swatch breach" style="background:transparent"></i>Missed a deadline</span><span><i class="swatch ph-queue"></i>Waiting in a queue</span><span><i class="swatch ph-hold"></i>On hold</span></div>
       </div>
       <div class="card" style="padding:8px 24px 16px"><div class="brtable" id="brtable"></div></div>
@@ -339,7 +339,7 @@ html.embed .fullpage{display:inline-flex}
     <section>
       <div class="sh">
         <div><h2>Are we getting faster? <span id="lead-info"></span></h2><p class="sub">Lead time by the month briefs launched.</p></div>
-        <div class="legend"><span><i class="swatch" style="background:#FF6A13"></i>Brief Library (brief + filming + CS review)</span><span><i class="swatch" style="background:#E9D5B7"></i>Production (editing + launch)</span><span><i style="display:inline-block;width:16px;border-top:2px dashed #A8A098"></i><span id="tgt-lbl">Target</span></span></div>
+        <div class="legend"><span><i class="swatch" style="background:#FF6A13"></i>Brief Library (brief + filming + footage review)</span><span><i class="swatch" style="background:#E9D5B7"></i>Production (edit brief + editing + launch)</span><span><i style="display:inline-block;width:16px;border-top:2px dashed #A8A098"></i><span id="tgt-lbl">Target</span></span></div>
       </div>
       <div class="card"><div class="chartbox" style="height:300px"><canvas id="c-lead" role="img" aria-label="Lead time by launch month"></canvas></div><p class="note" id="lead-note"></p></div>
     </section>
@@ -483,11 +483,12 @@ var STAGES = [
   ['Growth QA to launch', 'Growth', 'gr', 'Growth QA · Ready To Build'],
   ['On hold', 'Paused', 'hold', 'Hold']
 ];
-// Five phases on top of the 17 stages (stage indexes into STAGES). Colours differ in lightness as well as hue.
+// Six phases on top of the 17 stages (stage indexes into STAGES). Colours differ in lightness as well as hue.
 var PHASES = [
-  { key: 'brief',  name: 'Brief',     owner: 'CS',      color: '#5B8DEF', stages: [0, 1, 2] },
-  { key: 'film',   name: 'Filming',   owner: 'Partner', color: '#F2C94C', stages: [3, 5] },
-  { key: 'review', name: 'CS review', owner: 'CS',      color: '#F0A6C8', stages: [4, 6, 7] },
+  { key: 'brief',  name: 'Brief',     owner: 'CS',      color: '#5B8DEF', stages: [0, 1, 2], library: true },
+  { key: 'film',   name: 'Filming',   owner: 'Partner', color: '#F2C94C', stages: [3, 5], library: true },
+  { key: 'review', name: 'Footage review', owner: 'CS', color: '#F0A6C8', stages: [4, 6], library: true },
+  { key: 'mbrief', name: 'Edit brief', owner: 'CS',    color: '#C75B9B', stages: [7] },
   { key: 'edit',   name: 'Editing',   owner: 'Editor',  color: '#2FA66A', stages: [8, 9, 10, 11, 12, 13, 14], queue: 8 },
   { key: 'launch', name: 'Launch',    owner: 'Growth',  color: '#B48CF2', stages: [15] }
 ];
@@ -1378,7 +1379,7 @@ function phaseTip(x, i) {
     return esc(STAGES[j][0]) + ' ' + x.s.days[j] + 'd' + (x.s.flags.byStage[j] ? ' <span style="color:var(--red)">· ' + esc(x.s.flags.byStage[j][0]) + '</span>' : '');
   }).join('<br>') + '</div>';
 }
-// One brief's bar: 5 phases (queue split out inside Editing) or all 17 steps.
+// One brief's bar: 6 phases (queue split out inside Editing) or all 17 steps.
 function briefBar(x, max, mode) {
   var s = x.s, h = '';
   if (mode === 'steps') {
@@ -1608,7 +1609,8 @@ function renderTrends() {
   var tot = groups.map(function (g) { return g.length ? leadTime(g) : null; });
   var libShare = groups.map(function (g) {
     if (!g.length) return 0;
-    var a = avg(g.map(function (x) { return phaseDays(x.s, 0) + phaseDays(x.s, 1) + phaseDays(x.s, 2); })), b = avg(g.map(function (x) { return phaseDays(x.s, 3) + phaseDays(x.s, 4); }));
+    var part = function (lib) { return avg(g.map(function (x) { return sum(PHASES.map(function (ph, i) { return !!ph.library === lib ? phaseDays(x.s, i) : 0; })); })); };
+    var a = part(true), b = part(false);
     return a / ((a + b) || 1);
   });
   var lib = tot.map(function (t, i) { return t == null ? null : r1n(t * libShare[i]); });

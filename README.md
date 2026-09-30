@@ -23,7 +23,7 @@ segment or card means it broke a deadline.
 - **Briefs**: filters (search, start date, month, product, Late only). **The typical brief** shows the average
   days for every step in order, coloured by phase (queue time striped), with each phase's total and median, the
   full step list underneath, and the four longest steps. Time on hold isn't included.
-  **Every brief** lists each brief with its phase bar (or all 17 steps), where it is now, its longest step and
+  **Every brief** lists each brief with its 6-phase bar (or all 17 steps), where it is now, its longest step and
   its total. Click a row for a plain-English breakdown with one card per phase.
   **Action items** (under Every brief) lists every open brief that has been in its current phase for more than
   `PHASE_STUCK_DAYS` (2) days, with the next step to take (one per step, e.g. "Review V1 and send notes to the
@@ -42,13 +42,14 @@ segment or card means it broke a deadline.
 
 ## Phases
 
-The 17 stages are grouped into five phases (the `PHASES` config in `index.html`):
+The 17 stages are grouped into six phases (the `PHASES` config in `index.html`):
 
 | Phase | Owner | Stages | Colour |
 |---|---|---|---|
 | Brief | CS | Briefing, Brief review, Late send to partner | blue |
 | Filming | Partner | Filming, Footage revisions | yellow |
-| CS review | CS | Footage review, Revision review, Edit brief | pink |
+| Footage review | CS | Footage review, Revision review (Brief Library) | pink |
+| Edit brief | CS | Edit brief (first step once the brief reaches the MCT) | magenta |
 | Editing | Editor | Waiting in queue (striped), V1 production, V1 review, Revisions, Final review, Exec review, Resize + upload | green |
 | Launch | Growth | Growth QA to launch | purple |
 | On hold | | not counted as production time | grey |
