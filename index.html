@@ -130,6 +130,13 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
 .brtable tr.row.on td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .bname{font-weight:600;min-width:180px}
 .bname .m{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.acttable{min-width:860px}
+.acttable td{vertical-align:top}
+.acttable .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.acttable .what{font-weight:600}
+.acttable .why{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.acttable a.b{color:var(--text);text-decoration:none;font-weight:500}
+.acttable a.b:hover{color:var(--accent)}
 .pcards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}
 .pcard{background:var(--card-2);border-radius:12px;padding:14px 16px;min-width:0}
 .pcard.breach{box-shadow:inset 0 0 0 2px var(--breach)}
@@ -312,6 +319,13 @@ html.embed .fullpage{display:inline-flex}
       </div>
       <div class="card" style="padding:8px 24px 16px"><div class="brtable" id="brtable"></div></div>
     </section>
+    <section>
+      <div class="sh">
+        <div><h2>Action items <span id="act-info"></span></h2><p class="sub" id="act-sub"></p></div>
+        <div style="display:flex;gap:10px;align-items:center"><button type="button" class="linkbtn" id="act-all" hidden></button><button type="button" class="btn" id="copyact">Copy action items</button></div>
+      </div>
+      <div class="card" style="padding:8px 24px 16px"><div class="tablewrap" id="actions"></div></div>
+    </section>
     <section id="bd" class="card" hidden></section>
   </section>
 
@@ -414,6 +428,7 @@ var FOOTAGE_REVIEW_BUSINESS_DAYS = true; // count the footage-review limit in bu
 var MCT_STUCK_LIMIT = 7;           // days from handoff to launch before an item counts as stuck
 var WIP_LIMIT = 5;                 // open sprints per person before it turns red
 var STALLED_DAYS = 60;             // open briefs stuck this long in one stage count as stalled
+var PHASE_STUCK_DAYS = 2;          // Action items: flag open briefs that have been in their current phase longer than this
 
 // Who is included
 var ROSTER_ONLY_DEFAULT = true;    // "Current roster only": only partners whose Status is Active in the Partners Database
@@ -1432,10 +1447,81 @@ function renderBriefs() {
         '<td>' + (x.s.reached.some(Boolean) ? '<div class="bar">' + briefBar(x, max, BR_MODE) + '</div>' : '<span class="sub">Briefing not started</span>') + '</td>' +
         '<td style="white-space:nowrap">' + esc(nowLabel(x)) + '</td><td>' + longestStep(x) + '</td><td style="text-align:right;font-weight:700;white-space:nowrap">' + x.s.lead + 'd</td></tr>';
     }).join('') + '</tbody></table>' : '<div class="empty">No briefs match these filters.</div>';
+  renderActions();
   if (SELECTED && VIEW.some(function (x) { return x.id === SELECTED; })) showBrief(SELECTED, false); else $('bd').hidden = true;
 }
 $('brtable').addEventListener('click', function (e) { var r = e.target.closest('tr.row'); if (r) showBrief(r.dataset.id, true); });
 $('brtable').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { var r = e.target.closest('tr.row'); if (r) { e.preventDefault(); showBrief(r.dataset.id, true); } } });
+
+// ---- Action items: one per open brief that has sat in its current phase too long ----
+// [what to do, who does it] for each of the 17 steps. {who} is the person from Notion when known.
+var STEP_ACTIONS = [
+  ['Finish the brief', 'cs'],
+  ['Review and approve the brief', 'Brief reviewer (VP Creative / CS lead)'],
+  ['Send the brief to the partner', 'Partnerships'],
+  ['Chase the partner for footage', 'Partnerships'],
+  ['Review the footage: approve it or request edits', 'cs'],
+  ['Chase the partner for the revised footage', 'Partnerships'],
+  ['Review the revised footage and approve it', 'cs'],
+  ['Write the edit brief so an editor can start', 'cs'],
+  ['Assign an editor and start the edit', 'ed'],
+  ['Deliver V1', 'ed'],
+  ['Review V1 and send notes to the editor', 'cs'],
+  ['Finish the revisions', 'ed'],
+  ['Do the final review', 'cs'],
+  ['Get exec sign-off', 'Exec'],
+  ['Resize and upload the final files', 'ed'],
+  ['QA the ads and launch', 'Growth']
+];
+// Days a brief has been in its current phase: the current step plus the steps just before it in the same phase.
+function phaseStreak(s) {
+  var j = s.current, d = s.days[j], ph = STAGE_PHASE[j];
+  for (var k = j - 1; k >= 0 && STAGE_PHASE[k] === ph; k--) if (s.reached[k]) d += s.days[k];
+  return d;
+}
+function actionItems(list) {
+  var out = [];
+  list.forEach(function (x) {
+    var s = x.s, j = s.current;
+    if (!s.open || j == null || j === HOLD) return;
+    var days = phaseStreak(s);
+    if (days <= PHASE_STUCK_DAYS) return;
+    var A = STEP_ACTIONS[j], ph = phaseOf(j), stalled = s.days[j] > STALLED_DAYS;
+    var who = A[1] === 'cs' || A[1] === 'ed' ? whoFor(x, j) : A[1];
+    if (j === 3 || j === 5) who = 'Partnerships → ' + (x.partnerName || 'partner');
+    var why = STAGES[j][0] + ' for ' + daysTxt(s.days[j]) + (days !== s.days[j] ? ', ' + daysTxt(days) + ' in ' + ph.name : '');
+    var lt = s.flags.byStage[j] ? s.flags.byStage[j][0] : null;
+    out.push({ x: x, j: j, days: days, ph: ph, stalled: stalled, what: stalled ? 'Close or archive it in Notion: nothing has moved in ' + STALLED_DAYS + '+ days' : A[0],
+      who: stalled ? 'Partnerships' : who, why: why, limit: lt, level: stalled ? 'stalled' : lt || days >= 7 ? 'high' : 'mid' });
+  });
+  var rank = { high: 0, mid: 1, stalled: 2 };
+  return out.sort(function (a, b) { return rank[a.level] - rank[b.level] || b.days - a.days; });
+}
+var ACT_ALL = false;
+function renderActions() {
+  var items = actionItems(VIEW), show = ACT_ALL ? items : items.slice(0, 15);
+  setInfo('act-info', 'Built from the 17 steps: every open brief (matching the filters above) that has been in its current phase for more than ' + PHASE_STUCK_DAYS + ' days, with the next thing to do and who does it. Red = a deadline is broken or it\'s been 7+ days; yellow = over ' + PHASE_STUCK_DAYS + ' days; grey = stalled ' + STALLED_DAYS + '+ days and probably needs closing. Briefs on hold are left out. Change the ' + PHASE_STUCK_DAYS + '-day threshold with PHASE_STUCK_DAYS.');
+  var high = items.filter(function (i) { return i.level === 'high'; }).length;
+  $('act-sub').textContent = items.length ? items.length + ' briefs stuck in one phase for more than ' + PHASE_STUCK_DAYS + ' days' + (high ? ' · ' + high + ' urgent' : '') + ' · longest first' : 'Nothing has been stuck in one phase for more than ' + PHASE_STUCK_DAYS + ' days.';
+  var col = { high: 'var(--red)', mid: 'var(--yellow)', stalled: 'var(--faint)' };
+  $('actions').innerHTML = items.length ? '<table class="acttable"><thead><tr><th>Action</th><th>Brief</th><th>Who</th><th>Phase · step</th><th style="text-align:right">Days in phase</th></tr></thead><tbody>' + show.map(function (i) {
+    return '<tr><td><span class="dot" style="background:' + col[i.level] + '"></span><span class="what">' + esc(i.what) + '</span>' + (i.limit ? '<span class="why" style="color:var(--red)">' + esc(i.limit) + '</span>' : '') + '</td>' +
+      '<td><a class="b" href="' + esc(i.x.url) + '" target="_blank" rel="noopener">' + esc(briefLabel(i.x.name)) + ' ↗</a>' + notOnRosterTag(i.x) + '</td>' +
+      '<td>' + esc(i.who) + '</td><td><i class="swatch ph-' + i.ph.key + '"></i> ' + esc(i.ph.name) + '<span class="why">' + esc(i.why) + '</span></td>' +
+      '<td style="text-align:right;font-weight:700;white-space:nowrap;color:' + col[i.level] + '">' + i.days + 'd</td></tr>';
+  }).join('') + '</tbody></table>' : '<div class="empty">Nothing to chase right now.</div>';
+  $('act-all').hidden = items.length <= 15;
+  $('act-all').textContent = ACT_ALL ? 'Show fewer' : 'Show all ' + items.length;
+}
+function actionsText() {
+  var items = actionItems(VIEW);
+  if (!items.length) return '';
+  return ['Partner briefs · action items · ' + fmt(todayIso()) + ' (stuck in one phase over ' + PHASE_STUCK_DAYS + ' days)'].concat(items.map(function (i) {
+    return '• ' + i.what + ': ' + briefLabel(i.x.name) + ' · ' + i.who + ' · ' + i.ph.name + ', ' + i.days + 'd' + (i.limit ? ' (' + i.limit + ')' : '');
+  })).join('\n');
+}
+$('act-all').addEventListener('click', function () { ACT_ALL = !ACT_ALL; renderActions(); });
+$('copyact').addEventListener('click', function () { copyText(this, actionsText(), 'Copy action items'); });
 
 var SHOW_STEPS = false;
 function phaseLine(x, i) {

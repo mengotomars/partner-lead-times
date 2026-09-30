@@ -24,6 +24,10 @@ segment or card means it broke a deadline.
   days per phase (queue time striped inside Editing) with the median per phase and the four longest steps.
   **Every brief** lists each brief with its phase bar (or all 17 steps), where it is now, its longest step and
   its total. Click a row for a plain-English breakdown with one card per phase.
+  **Action items** (under Every brief) lists every open brief that has been in its current phase for more than
+  `PHASE_STUCK_DAYS` (2) days, with the next step to take (one per step, e.g. "Review V1 and send notes to the
+  editor"), who owns it, and how long it's been. Red = a deadline is broken or 7+ days, yellow = over 2 days,
+  grey = stalled 60+ days (close or archive). **Copy action items** copies the list as bullets.
 - **Trends** (3 / 6 / 12 months): lead time by launch month split into Brief Library vs production, a tile
   with a sparkline for every one of the 17 steps grouped by phase, open sprints per person against
   `WIP_LIMIT`, and assets launched per month.
