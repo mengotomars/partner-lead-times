@@ -418,9 +418,10 @@ var STALLED_DAYS = 60;             // open briefs stuck this long in one stage c
 // Who is included
 var ROSTER_ONLY_DEFAULT = true;    // "Current roster only": only partners whose Status is Active in the Partners Database
 var EXCLUDED_TIERS = ['Commander Crew']; // outlier tiers left out of all numbers (not the spend check)
-var EXCLUDED_PARTNERS = [];        // individual partners to leave out, e.g. ['Benjamin Smith']
+var EXCLUDED_PARTNERS = ['Benjamin Smith', 'Zach Rance']; // individual partners left out of the analytics
 // Different spellings of the same partner. Keys are compared without dots, commas or case.
 var PARTNER_ALIASES = {
+  'ben smith': 'Benjamin Smith',
   'coach juan leija': 'Juan Leija',
   'the meat mafia podcast': 'Meat Mafia Podcast',
   'dr kyle gillett md': 'Dr. Kyle Gillett, MD',
