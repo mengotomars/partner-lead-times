@@ -114,6 +114,9 @@ td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}
 .toggle[aria-pressed="true"]{border-color:var(--breach);color:var(--red)}
 .plegend{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px}
 .plegend div{font-size:12px;color:var(--muted);min-width:0}
+.steplegend{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.steplegend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:6px;align-items:center;color:var(--text);font-size:12px}
+.steplegend li b{font-weight:600;font-variant-numeric:tabular-nums}
 .plegend b{display:flex;align-items:center;gap:6px;color:var(--text);font-size:14px;font-weight:600}
 .steps4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .stepc{background:var(--card-2);border-radius:12px;padding:14px 16px}
@@ -1414,20 +1417,28 @@ function renderBriefs() {
     return { p: p, avg: avgSum, queue: q, med: med };
   });
   var total = sum(ph.map(function (x) { return x.avg; }));
-  var bar = ph.map(function (x) {
-    var t = '<b>' + x.p.name + '</b> · ' + x.p.owner + '<div>Average ' + r1(x.avg) + ' days · median ' + dd(x.med) + '</div>';
-    if (x.queue) return segHtml('ph-edit ph-queue', x.queue, total, '<b>Waiting in queue</b> · Editor<div>Average ' + r1(x.queue) + ' days</div>', false, r1(x.queue)) + segHtml('ph-' + x.p.key, x.avg - x.queue, total, t, false, r1(x.avg - x.queue));
-    return segHtml('ph-' + x.p.key, x.avg, total, t, false, r1(x.avg));
+  // One segment per step, in order, coloured by its phase (queue striped). On hold isn't a working step, so it's left out.
+  var stepAvg = STAGES.map(function (S, j) { return j === HOLD ? null : { j: j, a: stageAvg(VIEW, j), m: stageAvg(VIEW, j, median) }; });
+  var bar = stepAvg.filter(Boolean).map(function (x) {
+    if (!x.a.v) return '';
+    var t = '<b>' + esc(STAGES[x.j][0]) + '</b> · ' + esc(STAGES[x.j][1]) + '<div>Average ' + r1(x.a.v) + ' days · median ' + dd(x.m.v) + '</div><div class="m">' + phaseOf(x.j).name + ' phase · ' + x.a.n + ' briefs finished this step</div>';
+    return segHtml(stCls(x.j), x.a.v, total, t, false, x.a.v / total >= 0.035 ? r1(x.a.v) : '');
   }).join('');
+  var held = VIEW.filter(function (x) { return x.s.days[HOLD] > 0; });
   var stages = STAGES.map(function (S, j) { return { j: j, a: stageAvg(VIEW, j) }; }).filter(function (x) { return x.j !== HOLD && x.a.v != null; })
     .sort(function (a, b) { return b.a.v - a.a.v; }).slice(0, 4);
   $('typ-sub').textContent = VIEW.length + ' briefs started ' + (range ? 'in the last ' + range + ' days' : 'at any time') + ' · ' + VIEW.filter(function (x) { return x.s.open; }).length + ' still in progress';
-  setInfo('typ-info', 'Each segment is the average days a brief spends in that phase (finished steps only, briefs matching the filters). The number on the right adds the phases up: it describes a typical brief and isn\'t the official lead time, which is on the Today and Trends tabs. The median under each phase is the middle brief; when it\'s much lower than the average, a few slow briefs are pulling the average up.');
+  setInfo('typ-info', 'Each segment is one of the steps, in order, sized by the average days a brief spends in it (finished steps only, briefs matching the filters). Colours show the phase; striped green is waiting in the editor queue. Hover a segment, or read the list under the bar, for every step\'s average. The number on the right adds the phases up: it describes a typical brief and isn\'t the official lead time, which is on the Today and Trends tabs. The median under each phase is the middle brief; when it\'s much lower than the average, a few slow briefs are pulling the average up.');
   $('typical').innerHTML = VIEW.length ? '<div style="display:flex;align-items:center;gap:20px"><div class="bar tall" style="flex:1">' + bar + '</div>' +
     '<div style="text-align:right;white-space:nowrap"><div style="font:700 36px/1 var(--f-head)">' + r1(total) + 'd</div><div class="sub">typical brief · target ' + TARGET_LEAD_DAYS + 'd</div></div></div>' +
     '<div class="plegend">' + ph.map(function (x) {
-      return '<div><b><i class="swatch ph-' + x.p.key + '"></i>' + x.p.name + '</b>' + x.p.owner + ' · median ' + dd(x.med) + (x.queue ? ' · ' + r1(x.queue) + 'd of it waiting in queue' : '') + '</div>';
+      return '<div><b><i class="swatch ph-' + x.p.key + '"></i>' + x.p.name + ' · ' + r1(x.avg) + 'd</b>' + x.p.owner + ' · median ' + dd(x.med) +
+        '<ul class="steplegend">' + x.p.stages.map(function (j) {
+          var a = stepAvg[j].a;
+          return '<li><i class="swatch ' + stCls(j) + '"></i><span>' + esc(STAGES[j][0]) + '</span><b>' + (a.v == null ? '–' : r1(a.v) + 'd') + '</b></li>';
+        }).join('') + '</ul></div>';
     }).join('') + '</div>' +
+    (held.length ? '<p class="note">Time on hold isn\'t included: ' + held.length + ' brief' + (held.length === 1 ? '' : 's') + ' had a hold, averaging ' + r1(avg(held.map(function (x) { return x.s.days[HOLD]; }))) + ' days.</p>' : '') +
     '<div class="sec" style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px">Longest steps on average</div><div class="steps4">' + stages.map(function (x, i) {
       var q = x.j === QUEUE_STAGE;
       return '<div class="stepc' + (q ? ' q' : '') + '"><div class="k">' + (i + 1) + ' · ' + esc(STAGES[x.j][1]) + (q ? ' · waiting' : '') + '</div><div class="t">' + esc(STAGES[x.j][0]) + '</div><div class="v">' + r1(x.a.v) + 'd</div><div class="k">median ' + dd(stageAvg(VIEW, x.j, median).v) + ' · ' + x.a.n + ' briefs</div></div>';

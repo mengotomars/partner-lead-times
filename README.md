@@ -21,7 +21,8 @@ segment or card means it broke a deadline.
   Growth and Partners (longest overdue first, each linking to Notion). **$0 spend this week** is the spend
   check as a table, with **Copy for #partnerships** (the Slack message format).
 - **Briefs**: filters (search, start date, month, product, Late only). **The typical brief** shows the average
-  days per phase (queue time striped inside Editing) with the median per phase and the four longest steps.
+  days for every step in order, coloured by phase (queue time striped), with each phase's total and median, the
+  full step list underneath, and the four longest steps. Time on hold isn't included.
   **Every brief** lists each brief with its phase bar (or all 17 steps), where it is now, its longest step and
   its total. Click a row for a plain-English breakdown with one card per phase.
   **Action items** (under Every brief) lists every open brief that has been in its current phase for more than
